@@ -23,7 +23,7 @@ namespace KEL103Driver
             "Constant Power Mode",
             "Input Short Circuit Mode" };
 
-        private static readonly string[] mode_conversion_strings = { "VOLT","CURR","RES","POW","SHORT"};
+        private static readonly string[] mode_conversion_strings = { "CV","CC","CR","CW","SHORt"};
 
         public static async Task<int> GetSystemMode(IPAddress device_address)
         {
@@ -40,7 +40,9 @@ namespace KEL103Driver
 
                 var rx = (await client.ReceiveAsync()).Buffer;
 
-                return mode_conversion_strings.Select((x,i) => new {x, i}).Where(y => y.x == Encoding.ASCII.GetString(rx).Split('\n')[0]).ToArray()[0].i;
+                Console.WriteLine(Encoding.ASCII.GetString(rx));
+
+                return mode_conversion_strings.Select((x,i) => new {x, i}).Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
             }
         }
 

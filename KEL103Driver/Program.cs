@@ -25,21 +25,12 @@ namespace KEL103Driver
 
                 Console.WriteLine(result);
 
-                await KEL103Command.GetCommandFunc(KEL103Command.STORE)(address, 100);
+                //Console.WriteLine(KEL103Command.mode_strings[ await KEL103Command.GetSystemMode(address)]);
 
-                await Task.Delay(1000);
+                await KEL103Command.SetSystemMode(address, KEL103Command.SHORT_MODE);
 
-                var result3 = await KEL103Command.GetCommandFunc(KEL103Command.MEASURE_VOLTAGE)(address);
-
-                Console.WriteLine("{0:R}", result3);
-
-                //await KEL103Command.GetCommandFunc(KEL103Command.SET_CV_VOLTAGE)(address, 5.0001);
-
-                var result4 = await KEL103Command.GetCommandFunc(KEL103Command.GET_CV_VOLTAGE)(address);
-
-                Console.WriteLine("{0:R}", result4);
-
-
+                //for (double d = 0; d < 120.0; d += 0.0001)
+                //    await KEL103Command.SetConstantVoltageTarget(address, d);
             });
         }
     }
