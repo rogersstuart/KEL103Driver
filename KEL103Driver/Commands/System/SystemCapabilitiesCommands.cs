@@ -16,6 +16,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -35,6 +36,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -54,6 +56,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -73,6 +76,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -92,6 +96,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -111,6 +116,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -130,6 +136,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -149,6 +156,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 

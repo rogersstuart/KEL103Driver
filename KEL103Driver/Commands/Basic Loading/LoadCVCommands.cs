@@ -10,37 +10,39 @@ namespace KEL103Driver
 {
     public static partial class KEL103Command
     {
-        public static async Task SetConstantCurrentTarget(IPAddress device_address, double target_current)
+        public static async Task SetConstantVoltageTarget(IPAddress device_address, double target_voltage)
         {
             using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":CURR " + String.Format("{0:F5}", Math.Round(target_current, 5)) + "A\n");
+                var tx_bytes = Encoding.ASCII.GetBytes(":VOLT " + KEL103Tools.FormatString(target_voltage) + "V\n");
 
                 await client.SendAsync(tx_bytes, tx_bytes.Length);
             }
         }
 
-        public static async Task<double> GetConstantCurrentTarget(IPAddress device_address)
+        public static async Task<double> GetConstantVoltageTarget(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":CURR?\n");
+                var tx_bytes = Encoding.ASCII.GetBytes(":VOLT?\n");
 
                 await client.SendAsync(tx_bytes, tx_bytes.Length);
 
                 var rx = (await client.ReceiveAsync()).Buffer;
 
-                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
             }
         }
     }

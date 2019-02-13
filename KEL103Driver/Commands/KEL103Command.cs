@@ -80,13 +80,13 @@ namespace KEL103Driver
 
         public static readonly int TRIGGER = 3; //simulate an external trigger; only valid in pulse and flip mode
 
-        public static readonly int SET_PARAMETER = 4;
-        public static readonly int GET_PARAMETER = 5;
+        public static readonly int SET_SYSTEM_PARAMETER = 4;
+        public static readonly int GET_SYSTEM_PARAMETER = 5;
 
-        public static readonly int STATUS = 6;
+        public static readonly int GET_SYSTEM_STATUS = 6;
 
         public static readonly int SET_LOAD_INPUT_SWITCH_STATE = 7; //turn the load on or off
-        public static readonly int GET_LOAD_INPUT_SWITCH_STATE = 8; //get the output state
+        public static readonly int GET_LOAD_INPUT_SWITCH_STATE = 8; //is the input loaded down?
 
         public static readonly int SET_CV_VOLTAGE = 9; //set the constant voltage mode voltage
         public static readonly int GET_CV_VOLTAGE = 10; //get the constant voltage mode voltage

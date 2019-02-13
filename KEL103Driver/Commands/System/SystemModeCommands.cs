@@ -31,6 +31,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -39,8 +40,6 @@ namespace KEL103Driver
                 await client.SendAsync(tx_bytes, tx_bytes.Length);
 
                 var rx = (await client.ReceiveAsync()).Buffer;
-
-                Console.WriteLine(Encoding.ASCII.GetString(rx));
 
                 return mode_conversion_strings.Select((x,i) => new {x, i}).Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
             }
@@ -52,6 +51,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 

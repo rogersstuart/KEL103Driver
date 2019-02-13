@@ -16,6 +16,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -35,6 +36,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -51,6 +53,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -66,6 +69,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -81,6 +85,7 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
@@ -100,10 +105,27 @@ namespace KEL103Driver
             {
                 client.Client.ReceiveTimeout = 2000;
                 client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
 
                 client.Connect(device_address, KEL103Configuration.command_port);
 
                 var tx_bytes = Encoding.ASCII.GetBytes("*TRG\n");
+
+                await client.SendAsync(tx_bytes, tx_bytes.Length);
+            }
+        }
+
+        public static async Task SetSystemParameter(IPAddress device_address, int parameter, bool state)
+        {
+            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            {
+                client.Client.ReceiveTimeout = 2000;
+                client.Client.SendTimeout = 2000;
+                client.DontFragment = false;
+
+                client.Connect(device_address, KEL103Configuration.command_port);
+
+                var tx_bytes = Encoding.ASCII.GetBytes(":SYST:BEEP OFF\n");
 
                 await client.SendAsync(tx_bytes, tx_bytes.Length);
             }
