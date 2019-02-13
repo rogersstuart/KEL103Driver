@@ -15,11 +15,7 @@ namespace KEL103Driver
         {
             using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
             {
-                client.Client.ReceiveTimeout = 2000;
-                client.Client.SendTimeout = 2000;
-                client.DontFragment = false;
-
-                client.Connect(device_address, KEL103Configuration.command_port);
+                KEL103Tools.ConfigureClient(device_address, client);
 
                 var tx_bytes = Encoding.ASCII.GetBytes(":RCL:BATT " + list_index + "\n");
 
@@ -31,11 +27,7 @@ namespace KEL103Driver
         {
             using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
             {
-                client.Client.ReceiveTimeout = 2000;
-                client.Client.SendTimeout = 2000;
-                client.DontFragment = false;
-
-                client.Connect(device_address, KEL103Configuration.command_port);
+                KEL103Tools.ConfigureClient(device_address, client);
 
                 var tx_bytes = Encoding.ASCII.GetBytes(":RCL:BATT?\n");
 
@@ -53,11 +45,7 @@ namespace KEL103Driver
         {
             using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
             {
-                client.Client.ReceiveTimeout = 2000;
-                client.Client.SendTimeout = 2000;
-                client.DontFragment = false;
-
-                client.Connect(device_address, KEL103Configuration.command_port);
+                KEL103Tools.ConfigureClient(device_address, client);
 
                 var tx_bytes = Encoding.ASCII.GetBytes(":BATT " + list_index + "," + KEL103Tools.FormatString(current_range) +
                     "A," + KEL103Tools.FormatString(discharge_current) + "A," + KEL103Tools.FormatString(cutoff_voltage) + 

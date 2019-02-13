@@ -13,5 +13,7 @@ namespace KEL103Driver
         public static readonly int broadcast_port = 18191;
         public static readonly int command_port = 18190;
         public static readonly byte[] search_message = Encoding.ASCII.GetBytes("find_ka000");
+        public static readonly int read_timeout = 2000;
+        public static readonly int write_timeout = 2000;
     }
 }

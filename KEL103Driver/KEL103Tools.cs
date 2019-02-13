@@ -12,7 +12,7 @@ namespace KEL103Driver
     {
         public static async Task<IPAddress> FindLoadAddress()
         {
-            IPEndPoint search_endpoint = new IPEndPoint(IPAddress.Parse("192.168.1.255"), 18191);
+            IPEndPoint search_endpoint = new IPEndPoint(KEL103Configuration.broadcast_address, KEL103Configuration.broadcast_port);
 
             //client.Open
             var tx_bytes = Encoding.ASCII.GetBytes("find_ka000");
@@ -21,8 +21,8 @@ namespace KEL103Driver
             udp_client.Client.Bind(new IPEndPoint(IPAddress.Any, KEL103Configuration.broadcast_port));
             var from = new IPEndPoint(0, 0);
 
-            udp_client.Client.ReceiveTimeout = 2000;
-            udp_client.Client.SendTimeout = 2000;
+            udp_client.Client.ReceiveTimeout = KEL103Configuration.read_timeout;
+            udp_client.Client.SendTimeout = KEL103Configuration.write_timeout;
 
             var feed = new List<string>();
 
@@ -68,6 +68,15 @@ namespace KEL103Driver
             int precision = 5 - s;
             string format = String.Format("###0.{0};###0.{0}", new String('0', precision));
             return d.ToString(format);
+        }
+
+        public static void ConfigureClient(IPAddress device_address, UdpClient client)
+        {
+            client.Client.ReceiveTimeout = KEL103Configuration.read_timeout;
+            client.Client.SendTimeout = KEL103Configuration.write_timeout;
+            client.DontFragment = false;
+
+            client.Connect(device_address, KEL103Configuration.command_port);
         }
     }
 }
