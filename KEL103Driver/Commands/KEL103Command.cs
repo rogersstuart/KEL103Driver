@@ -17,7 +17,8 @@ namespace KEL103Driver
             new Func<IPAddress, int, Task>(async (address, location_index) => {await StoreToUnit(address, location_index);}), /*1*/
             new Func<IPAddress, int, Task>(async (address, location_index) => {await RecallToUnit(address, location_index);}), /*2*/
 
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*3*/
+            new Func<IPAddress, Task>(async address => {await SimulateTrigger(address);}), /*3*/
+
             new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*4*/
             new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*5*/
             new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*6*/
@@ -27,26 +28,26 @@ namespace KEL103Driver
             new Func<IPAddress, double, Task>(async (address, target_voltage) => {await SetConstantVoltageTarget(address, target_voltage);}), /*9*/
             new Func<IPAddress, Task<double>>(async address => {return await GetConstantVoltageTarget(address);}), /*10*/
 
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*11*/
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*12*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMaximumSupportedSystemInputVoltage(address);}), /*11*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMinimumSupportedSystemInputVoltage(address);}), /*12*/
 
             new Func<IPAddress, double, Task>(async (address, target_current) => {await SetConstantCurrentTarget(address, target_current);}), /*13*/
             new Func<IPAddress, Task<double>>(async address => {return await GetConstantCurrentTarget(address);}), /*14*/
 
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*15*/
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*16*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMaximumSupportedSystemInputCurrent(address);}), /*15*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMinimumSupportedSystemInputCurrent(address);}), /*16*/
 
             new Func<IPAddress, double, Task>(async (address, target_resistance) => {await SetConstantResistanceTarget(address, target_resistance);}), /*17*/ 
             new Func<IPAddress, Task<double>>(async address => {return await GetConstantResistanceTarget(address);}), /*18*/ 
 
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*19*/
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*20*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMaximumSupportedSystemInputResistance(address);}), /*19*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMinimumSupportedSystemInputResistance(address);}), /*20*/
 
             new Func<IPAddress, double, Task>(async (address, target_power) => {await SetConstantPowerTarget(address, target_power);}), /*21*/  
             new Func<IPAddress, Task<double>>(async address => {return await GetConstantPowerTarget(address);}), /*22*/  
 
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*23*/
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*24*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMaximumSupportedSystemInputPower(address);}), /*23*/
+            new Func<IPAddress, Task<double>>(async address => {return await GetMinimumSupportedSystemInputPower(address);}), /*24*/
 
             new Func<IPAddress, Task<double>>(async address => {return await MeasureCurrent(address);}), /*25*/
             new Func<IPAddress, Task<double>>(async address => {return await MeasureVoltage(address);}), /*26*/
@@ -66,16 +67,24 @@ namespace KEL103Driver
             new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*39*/
             new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*40*/
             new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}), /*41*/
-            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);})  /*42*/
+            new Func<IPAddress, Task<string>>(async address => {return await Identify(address);}),  /*42*/
+
+            new Func<IPAddress, int, Task>(async (address, mode) => {await SetSystemMode(address, mode);}), /*43*/
+            new Func<IPAddress, Task<int>>(async address => {return await GetSystemMode(address);}), /*44*/
         };
 
         public static readonly int IDENTIFY = 0; //get product information
+
         public static readonly int STORE = 1; //store to unit
         public static readonly int RECALL = 2; //recall from unit storage
+
         public static readonly int TRIGGER = 3; //simulate an external trigger; only valid in pulse and flip mode
+
         public static readonly int SET_PARAMETER = 4;
         public static readonly int GET_PARAMETER = 5;
+
         public static readonly int STATUS = 6;
+
         public static readonly int SET_LOAD_INPUT_SWITCH_STATE = 7; //turn the load on or off
         public static readonly int GET_LOAD_INPUT_SWITCH_STATE = 8; //get the output state
 
@@ -97,11 +106,11 @@ namespace KEL103Driver
         public static readonly int RESISTANCE_UPPER = 19;
         public static readonly int RESISTANCE_LOWER = 20;
 
-        public static readonly int SET_CW_WATTAGE = 21; //set the constant wattage mode wattage
-        public static readonly int GET_CW_WATTAGE = 22; //get the constant wattage mode wattage
+        public static readonly int SET_CW_POWER = 21; //set the constant wattage mode wattage
+        public static readonly int GET_CW_POWER = 22; //get the constant wattage mode wattage
 
-        public static readonly int WATTAGE_UPPER = 23;
-        public static readonly int WATTAGE_LOWER = 24;
+        public static readonly int POWER_UPPER = 23;
+        public static readonly int POWER_LOWER = 24;
 
         public static readonly int MEASURE_CURRENT = 25;
         public static readonly int MEASURE_VOLTAGE = 26;
@@ -132,6 +141,9 @@ namespace KEL103Driver
 
         public static readonly int SET_DYNAMIC = 41;
         public static readonly int GET_DYNAMIC = 42;
+
+        public static readonly int SET_OPERATING_MODE = 43;
+        public static readonly int GET_OPERATING_MODE = 44;
 
         public static dynamic GetCommandFunc(int command_index)
         {

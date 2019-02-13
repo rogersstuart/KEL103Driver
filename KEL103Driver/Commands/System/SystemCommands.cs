@@ -93,5 +93,20 @@ namespace KEL103Driver
                 return Encoding.ASCII.GetString(rx).Split('\n')[0] == "1" ? true : false;
             }
         }
+
+        public static async Task SimulateTrigger(IPAddress device_address)
+        {
+            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            {
+                client.Client.ReceiveTimeout = 2000;
+                client.Client.SendTimeout = 2000;
+
+                client.Connect(device_address, KEL103Configuration.command_port);
+
+                var tx_bytes = Encoding.ASCII.GetBytes("*TRG\n");
+
+                await client.SendAsync(tx_bytes, tx_bytes.Length);
+            }
+        }
     }
 }

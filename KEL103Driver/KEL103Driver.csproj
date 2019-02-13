@@ -48,8 +48,10 @@
     <Compile Include="Commands\Loading\LoadCRCommands.cs" />
     <Compile Include="Commands\Loading\LoadCVCommands.cs" />
     <Compile Include="Commands\Loading\LoadCWCommands.cs" />
-    <Compile Include="Commands\MeasureCommands.cs" />
-    <Compile Include="Commands\SystemCommands.cs" />
+    <Compile Include="Commands\Measure\MeasureCommands.cs" />
+    <Compile Include="Commands\System\SystemModeCommands.cs" />
+    <Compile Include="Commands\System\SystemCapabilitiesCommands.cs" />
+    <Compile Include="Commands\System\SystemCommands.cs" />
     <Compile Include="KEL103Configuration.cs" />
     <Compile Include="KEL103Tools.cs" />
     <Compile Include="Program.cs" />
