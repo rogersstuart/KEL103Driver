@@ -23,7 +23,8 @@ namespace KEL103Driver
             }
         }
 
-        public static async Task QueryBatteryTestModeParameters(IPAddress device_address, int list_index)
+        //recall before querying
+        public static async Task<string> QueryBatteryTestModeParameters(IPAddress device_address, int list_index)
         {
             using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
             {
@@ -35,10 +36,9 @@ namespace KEL103Driver
 
                 var rx = (await client.ReceiveAsync()).Buffer;
 
-                Console.WriteLine(Encoding.ASCII.GetString(rx));
+                return Encoding.ASCII.GetString(rx);
             }
         }
-
 
         public static async Task SetBatteryTestModeParameters(IPAddress device_address, int list_index, double current_range,
             double discharge_current, double cutoff_voltage, double cutoff_capacity, double discharge_time)
@@ -51,9 +51,39 @@ namespace KEL103Driver
                     "A," + KEL103Tools.FormatString(discharge_current) + "A," + KEL103Tools.FormatString(cutoff_voltage) + 
                     "V," + KEL103Tools.FormatString(cutoff_capacity) + "AH," + KEL103Tools.FormatString(discharge_time) + "S\n");
 
-                Console.WriteLine(Encoding.ASCII.GetString(tx_bytes));
+                await client.SendAsync(tx_bytes, tx_bytes.Length);
+            }
+        }
+
+        public static async Task<double> QueryBatteryTestTimer(IPAddress device_address)
+        {
+            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            {
+                KEL103Tools.ConfigureClient(device_address, client);
+
+                var tx_bytes = Encoding.ASCII.GetBytes(":BATT:TIM?\n");
 
                 await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+                var rx = (await client.ReceiveAsync()).Buffer;
+
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('S')[0]);
+            }
+        }
+
+        public static async Task<double> QueryBatteryTestCapacityCounter(IPAddress device_address)
+        {
+            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            {
+                KEL103Tools.ConfigureClient(device_address, client);
+
+                var tx_bytes = Encoding.ASCII.GetBytes(":BATT:CAP?\n");
+
+                await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+                var rx = (await client.ReceiveAsync()).Buffer;
+
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
             }
         }
     }

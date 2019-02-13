@@ -37,7 +37,8 @@ namespace KEL103Driver
 
                 var rx = (await client.ReceiveAsync()).Buffer;
 
-                return mode_conversion_strings.Select((x,i) => new {x, i}).Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
+                return mode_conversion_strings.Select((x, i) => new {x, i})
+                    .Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
             }
         }
 

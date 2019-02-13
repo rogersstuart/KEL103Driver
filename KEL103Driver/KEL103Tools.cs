@@ -67,6 +67,7 @@ namespace KEL103Driver
             int s = Math.Abs(d).ToString("####0").Length;
             int precision = 5 - s;
             string format = String.Format("###0.{0};###0.{0}", new String('0', precision));
+
             return d.ToString(format);
         }
 

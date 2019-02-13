@@ -27,10 +27,16 @@ namespace KEL103Driver
 
                 //Console.WriteLine(KEL103Command.mode_strings[ await KEL103Command.GetSystemMode(address)]);
 
-                await KEL103Command.SetBatteryTestModeParameters(address, 2, 30, 7, 35, 11, 50);
+                await KEL103Command.SetDynamicMode_Pulse(address, 0.1, 0.1, .01, 0.1, 1);
+                Console.WriteLine(await KEL103Command.QueryDynamicMode(address));
+
+                //await KEL103Command.SetBatteryTestModeParameters(address, 2, 30, 7, 35, 11, 50);
                
-                await KEL103Command.RecallBatteryTestModeParameters(address, 2);
-                await KEL103Command.QueryBatteryTestModeParameters(address, 2);
+                //await KEL103Command.RecallBatteryTestModeParameters(address, 2);
+                //await KEL103Command.QueryBatteryTestModeParameters(address, 2);
+
+                //Console.WriteLine(await KEL103Command.QueryBatteryTestTimer(address));
+                //Console.WriteLine(await KEL103Command.QueryBatteryTestCapacityCounter(address));
 
                 //await KEL103Command.SetSystemMode(address, KEL103Command.SHORT_MODE);
 
