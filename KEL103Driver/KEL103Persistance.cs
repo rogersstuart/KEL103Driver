@@ -64,7 +64,7 @@ namespace KEL103Driver
 
     public static class KEL103Persistance
     {
-        private static bool needs_init = false;
+        private static bool needs_init = true;
 
         private static readonly string persistance_file = System.AppDomain.CurrentDomain.BaseDirectory + "/kel103driver_config.json";
         private static string configuration_serialization = JsonConvert.SerializeObject(new KEL103Configuration());
@@ -83,7 +83,7 @@ namespace KEL103Driver
 
                     configuration_serialization = persistance_serialization_holding;
 
-                    needs_init = true;
+                    needs_init = false;
 
                     return;
                 }
@@ -99,7 +99,7 @@ namespace KEL103Driver
                 {
                     File.WriteAllText(persistance_file, configuration_serialization);
 
-                    needs_init = true;
+                    needs_init = false;
                 }
             }
             catch(Exception ex) { return; }
