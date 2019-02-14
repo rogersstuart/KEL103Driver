@@ -15,7 +15,7 @@ namespace KEL103Driver
         public string BroadcastAddressString { get; set; } = "192.168.1.255";
         public int BroadcastPort { get; set; } = 18191;
         public int CommandPort { get; set; } = 18190;
-        public byte[] SearchMessage { get; set; } = Encoding.ASCII.GetBytes("find_ka000");
+        public string SearchMessageString { get; set; } = "find_ka000";
         public int ReadTimeout { get; set; } = 2000;
         public int WriteTimeout { get; set; } = 2000;
         public bool EnableInterfaceSearch { get; set; } = true;
@@ -49,6 +49,16 @@ namespace KEL103Driver
             {
                 LoadAddressString = value.ToString();
             }
+        }
+
+        [JsonIgnore]
+        public byte[] SearchMessage
+        {
+            get
+            {
+                return Encoding.ASCII.GetBytes(SearchMessageString);
+            }
+
         }
     }
 
