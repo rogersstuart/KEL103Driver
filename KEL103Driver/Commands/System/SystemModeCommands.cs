@@ -27,7 +27,7 @@ namespace KEL103Driver
 
         public static async Task<int> GetSystemMode(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -44,7 +44,7 @@ namespace KEL103Driver
 
         public static async Task SetSystemMode(IPAddress device_address, int mode)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 

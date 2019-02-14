@@ -12,7 +12,7 @@ namespace KEL103Driver
     {
         public static async Task<double> MeasureVoltage(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -28,7 +28,7 @@ namespace KEL103Driver
 
         public static async Task<double> MeasureCurrent(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -44,7 +44,7 @@ namespace KEL103Driver
 
         public static async Task<double> MeasurePower(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 

@@ -13,7 +13,7 @@ namespace KEL103Driver
         
         public static async Task RecallBatteryTestModeParameters(IPAddress device_address, int list_index)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -26,7 +26,7 @@ namespace KEL103Driver
         //recall before querying
         public static async Task<string> QueryBatteryTestModeParameters(IPAddress device_address, int list_index)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -43,7 +43,7 @@ namespace KEL103Driver
         public static async Task SetBatteryTestModeParameters(IPAddress device_address, int list_index, double current_range,
             double discharge_current, double cutoff_voltage, double cutoff_capacity, double discharge_time)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -57,7 +57,7 @@ namespace KEL103Driver
 
         public static async Task<double> QueryBatteryTestTimer(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -73,7 +73,7 @@ namespace KEL103Driver
 
         public static async Task<double> QueryBatteryTestCapacityCounter(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 

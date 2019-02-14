@@ -29,7 +29,7 @@ namespace KEL103Driver
 
         public static async Task<string> QueryDynamicMode(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -43,9 +43,9 @@ namespace KEL103Driver
             }
         }
 
-        public static async Task SetDynamicMode_OneThroughFour(IPAddress device_address, int mode, double low_value, double high_value, double frequency, double duty_cycle)
+        public static async Task SetDynamicMode(IPAddress device_address, int mode, double low_value, double high_value, double frequency, double duty_cycle)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -59,10 +59,11 @@ namespace KEL103Driver
             }
         }
 
+        //these work but don't seem to do anything
         public static async Task SetDynamicMode_Pulse(IPAddress device_address, double low_slope, double high_slope, double low_current,
             double high_current, double time)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -79,7 +80,7 @@ namespace KEL103Driver
         public static async Task SetDynamicMode_Flip(IPAddress device_address, double low_slope, double high_slope, double low_current,
             double high_current)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 

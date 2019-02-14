@@ -12,7 +12,7 @@ namespace KEL103Driver
     {
         public static async Task<double> GetMaximumSupportedSystemInputVoltage(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -28,7 +28,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetMinimumSupportedSystemInputVoltage(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -44,7 +44,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetMaximumSupportedSystemInputCurrent(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -60,7 +60,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetMinimumSupportedSystemInputCurrent(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -76,7 +76,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetMaximumSupportedSystemInputResistance(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -92,7 +92,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetMinimumSupportedSystemInputResistance(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -108,7 +108,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetMaximumSupportedSystemInputPower(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -124,7 +124,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetMinimumSupportedSystemInputPower(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 

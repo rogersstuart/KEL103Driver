@@ -12,7 +12,7 @@ namespace KEL103Driver
     {
         public static async Task SetConstantPowerTarget(IPAddress device_address, double target_power)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -24,7 +24,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetConstantPowerTarget(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 

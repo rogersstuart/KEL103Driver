@@ -12,7 +12,7 @@ namespace KEL103Driver
     {
         public static async Task SetConstantVoltageTarget(IPAddress device_address, double target_voltage)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
@@ -24,7 +24,7 @@ namespace KEL103Driver
 
         public static async Task<double> GetConstantVoltageTarget(IPAddress device_address)
         {
-            using (UdpClient client = new UdpClient(KEL103Configuration.command_port))
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
