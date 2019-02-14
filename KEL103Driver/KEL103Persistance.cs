@@ -83,6 +83,8 @@ namespace KEL103Driver
 
                     configuration_serialization = persistance_serialization_holding;
 
+                    needs_init = false;
+
                     return;
                 }
             }
@@ -96,9 +98,11 @@ namespace KEL103Driver
                 if (!File.Exists(persistance_file))
                 {
                     File.WriteAllText(persistance_file, configuration_serialization);
+
+                    needs_init = false;
                 }
             }
-            catch(Exception ex) { }
+            catch(Exception ex) { return; }
             
         }
 
