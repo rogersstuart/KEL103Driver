@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,6 +12,8 @@ namespace KEL103Driver
 {
     public class KEL103Configuration
     {
+        public bool EnableVersionCheckOnLoad { get; set; } = true;
+        public readonly string AppVersion = Assembly.GetEntryAssembly().GetName().Version.ToString();
         public string LoadAddressString { get; set; } = "192.168.1.198";
         public string BroadcastAddressString { get; set; } = "192.168.1.255";
         public int BroadcastPort { get; set; } = 18191;
@@ -67,7 +70,7 @@ namespace KEL103Driver
         private static bool needs_init = true;
 
         private static readonly string persistance_file = System.AppDomain.CurrentDomain.BaseDirectory + "/kel103driver_config.json";
-        private static string configuration_serialization = JsonConvert.SerializeObject(new KEL103Configuration());
+        private static string configuration_serialization = JsonConvert.SerializeObject(new KEL103Configuration(), Newtonsoft.Json.Formatting.Indented);
 
         private static void Init()
         {
@@ -77,11 +80,15 @@ namespace KEL103Driver
             {
                 if (File.Exists(persistance_file))
                 {
-                    var persistance_serialization_holding = File.ReadAllText(persistance_file);
+                    var persistance_serialization_testing = File.ReadAllText(persistance_file);
 
-                    JsonConvert.DeserializeObject<KEL103Configuration>(persistance_serialization_holding); //test
+                    var testing = JsonConvert.DeserializeObject<KEL103Configuration>(persistance_serialization_testing); //test
 
-                    configuration_serialization = persistance_serialization_holding;
+                    if(testing.EnableVersionCheckOnLoad)
+                        if (testing.AppVersion != Assembly.GetEntryAssembly().GetName().Version.ToString())
+                            throw new Exception("new version detected; wiping configuration");
+
+                    configuration_serialization = persistance_serialization_testing;
 
                     needs_init = false;
 
