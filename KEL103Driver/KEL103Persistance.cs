@@ -83,7 +83,7 @@ namespace KEL103Driver
 
                     configuration_serialization = persistance_serialization_holding;
 
-                    needs_init = false;
+                    needs_init = true;
 
                     return;
                 }
@@ -99,7 +99,7 @@ namespace KEL103Driver
                 {
                     File.WriteAllText(persistance_file, configuration_serialization);
 
-                    needs_init = false;
+                    needs_init = true;
                 }
             }
             catch(Exception ex) { return; }
