@@ -16,14 +16,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes("*IDN?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return Encoding.ASCII.GetString(rx).Split('\n')[0];
+                return await Identify(client);
             }
+        }
+
+        public static async Task<string> Identify(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes("*IDN?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return Encoding.ASCII.GetString(rx).Split('\n')[0];
         }
 
         public static async Task StoreToUnit(IPAddress device_address, int location_index)
@@ -32,11 +37,16 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes("*SAV "+ location_index + "\n");
 
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
+                await StoreToUnit(client, location_index);
             }
+        }
+
+        public static async Task StoreToUnit(UdpClient client, int location_index)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes("*SAV " + location_index + "\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         public static async Task RecallToUnit(IPAddress device_address, int location_index)
@@ -45,10 +55,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes("*RCL " + location_index + "\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await RecallToUnit(client, location_index);
             }
+        }
+
+        public static async Task RecallToUnit(UdpClient client, int location_index)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes("*RCL " + location_index + "\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         public static async Task SetLoadInputSwitchState(IPAddress device_address, bool switch_state) //true is on, false is off
@@ -57,10 +72,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":INP " + (switch_state ? "ON" : "OFF") + "\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetLoadInputSwitchState(client, switch_state);
             }
+        }
+
+        public static async Task SetLoadInputSwitchState(UdpClient client, bool switch_state) //true is on, false is off
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":INP " + (switch_state ? "ON" : "OFF") + "\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         public static async Task<bool> GetLoadInputSwitchState(IPAddress device_address)  //true is on, false is off
@@ -69,14 +89,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":INP?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return Encoding.ASCII.GetString(rx).Split('\n')[0] == "ON" ? true : false;
+                return await GetLoadInputSwitchState(client);
             }
+        }
+
+        public static async Task<bool> GetLoadInputSwitchState(UdpClient client)  //true is on, false is off
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":INP?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return Encoding.ASCII.GetString(rx).Split('\n')[0] == "ON" ? true : false;
         }
 
         public static async Task SimulateTrigger(IPAddress device_address)
@@ -85,10 +110,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes("*TRG\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SimulateTrigger(client);
             }
+        }
+
+        public static async Task SimulateTrigger(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes("*TRG\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         /*

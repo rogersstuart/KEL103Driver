@@ -31,15 +31,20 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":FUNC?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return mode_conversion_strings.Select((x, i) => new {x, i})
-                    .Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
+                return await GetSystemMode(client);
             }
+        }
+
+        public static async Task<int> GetSystemMode(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":FUNC?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return mode_conversion_strings.Select((x, i) => new { x, i })
+                .Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
         }
 
         public static async Task SetSystemMode(IPAddress device_address, int mode)
@@ -48,10 +53,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":FUNC " + mode_conversion_strings[mode] + "\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetSystemMode(client, mode);
             }
+        }
+
+        public static async Task SetSystemMode(UdpClient client, int mode)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":FUNC " + mode_conversion_strings[mode] + "\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
     }
 }
