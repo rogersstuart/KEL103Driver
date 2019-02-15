@@ -33,14 +33,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":DYN?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return Encoding.ASCII.GetString(rx).Split('\n')[0];
+                return await QueryDynamicMode(client);
             }
+        }
+
+        public static async Task<string> QueryDynamicMode(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":DYN?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return Encoding.ASCII.GetString(rx).Split('\n')[0];
         }
 
         public static async Task SetDynamicMode(IPAddress device_address, int mode, double low_value, double high_value, double frequency, double duty_cycle)
@@ -49,14 +54,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                string mode_string = mode + "," + KEL103Tools.FormatString(low_value) + dynamic_mode_suffix_strings[mode - 1] + "," +
-                    KEL103Tools.FormatString(high_value) + dynamic_mode_suffix_strings[mode - 1] + "," + KEL103Tools.FormatString(frequency) + "HZ," +
-                    KEL103Tools.FormatString(duty_cycle) + "%";
-
-                var tx_bytes = Encoding.ASCII.GetBytes(":DYN " + mode_string + "\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetDynamicMode(client, mode, low_value, high_value, frequency, duty_cycle);
             }
+        }
+
+        public static async Task SetDynamicMode(UdpClient client, int mode, double low_value, double high_value, double frequency, double duty_cycle)
+        {
+            string mode_string = mode + "," + KEL103Tools.FormatString(low_value) + dynamic_mode_suffix_strings[mode - 1] + "," +
+                KEL103Tools.FormatString(high_value) + dynamic_mode_suffix_strings[mode - 1] + "," + KEL103Tools.FormatString(frequency) + "HZ," +
+                KEL103Tools.FormatString(duty_cycle) + "%";
+
+            var tx_bytes = Encoding.ASCII.GetBytes(":DYN " + mode_string + "\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         //these work but don't seem to do anything
@@ -67,15 +77,22 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                string mode_string = 5 + "," + KEL103Tools.FormatString(low_slope) + "A/uS," +
-                    KEL103Tools.FormatString(high_slope) + "A/uS," + KEL103Tools.FormatString(low_current) + "A," +
-                    KEL103Tools.FormatString(high_current) + "A," + KEL103Tools.FormatString(time) + "S";
-
-                var tx_bytes = Encoding.ASCII.GetBytes(":DYN " + mode_string + "\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetDynamicMode_Pulse(client, low_slope, high_slope, low_current, high_current, time);
             }
         }
+
+        //these work but don't seem to do anything
+        public static async Task SetDynamicMode_Pulse(UdpClient client, double low_slope, double high_slope, double low_current,
+            double high_current, double time)
+        {
+            string mode_string = 5 + "," + KEL103Tools.FormatString(low_slope) + "A/uS," +
+                KEL103Tools.FormatString(high_slope) + "A/uS," + KEL103Tools.FormatString(low_current) + "A," +
+                KEL103Tools.FormatString(high_current) + "A," + KEL103Tools.FormatString(time) + "S";
+
+            var tx_bytes = Encoding.ASCII.GetBytes(":DYN " + mode_string + "\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+    }
 
         public static async Task SetDynamicMode_Flip(IPAddress device_address, double low_slope, double high_slope, double low_current,
             double high_current)
@@ -84,14 +101,33 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                string mode_string = 6 + "," + KEL103Tools.FormatString(low_slope) + "A/uS," +
-                    KEL103Tools.FormatString(high_slope) + "A/uS," + KEL103Tools.FormatString(low_current) + "A," +
-                    KEL103Tools.FormatString(high_current) + "A";
-
-                var tx_bytes = Encoding.ASCII.GetBytes(":DYN " + mode_string + "\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetDynamicMode_Flip(client, low_slope, high_slope, low_current, high_current);
             }
         }
+
+        public static async Task SetDynamicMode_Flip(UdpClient client, double low_slope, double high_slope, double low_current,
+            double high_current)
+        {
+            string mode_string = 6 + "," + KEL103Tools.FormatString(low_slope) + "A/uS," +
+                KEL103Tools.FormatString(high_slope) + "A/uS," + KEL103Tools.FormatString(low_current) + "A," +
+                KEL103Tools.FormatString(high_current) + "A";
+
+            var tx_bytes = Encoding.ASCII.GetBytes(":DYN " + mode_string + "\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+        }
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }
