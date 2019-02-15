@@ -14,9 +14,15 @@ namespace KEL103DriverUtility
         [STAThread]
         static void Main()
         {
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new MainForm());
+            var address = KEL103Driver.KEL103Tools.FindLoadAddress();
+            address.Wait();
+            var res = KEL103Driver.KEL103Command.MeasureResistance(address.Result);
+            res.Wait();
+            Console.WriteLine(res.Result);
+            
+            //Application.EnableVisualStyles();
+            //Application.SetCompatibleTextRenderingDefault(false);
+            //Application.Run(new MainForm());
         }
     }
 }
