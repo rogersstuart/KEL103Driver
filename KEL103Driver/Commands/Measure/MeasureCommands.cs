@@ -17,7 +17,7 @@ namespace KEL103Driver
                 KEL103Tools.ConfigureClient(device_address, client);
 
                 return await MeasureVoltage(client);
-            }  
+            }
         }
 
         public static async Task<double> MeasureVoltage(UdpClient client)
@@ -88,8 +88,13 @@ namespace KEL103Driver
             var voltage = await MeasureVoltage(client);
             var current = await MeasureCurrent(client);
 
+            //i'm not sure what the theory on this is. if the voltage drop is 0 then the resistor is perfect and the resistance is 0.
+            //with current, we're supposed to know how much is flowing through the resistor. 0 current is invalid.
+            //nan is annoying and fake though, and in real life I doubt that the value would truely be zero it would just be really small.
+            //so I'm assuming we'd have a massive voltage across the however many terraohms of resitance with no detectable drop or flow so I'm just going to return positive infinity.
+
             if (current == 0.0)
-                return 0.0;
+                return Double.PositiveInfinity;
             else
                 return voltage / current;
         }
