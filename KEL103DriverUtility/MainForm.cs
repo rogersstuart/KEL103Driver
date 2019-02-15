@@ -23,7 +23,17 @@ namespace KEL103DriverUtility
         {
             var address = await KEL103Driver.KEL103Tools.FindLoadAddress();
 
-            textBox1.Text = address.ToString();
+            //textBox1.Text = address.ToString();
+        }
+
+        private void connectToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            //get the ip address for the kel103 and begin polling
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            //enable channel 2 monitor
         }
     }
 }

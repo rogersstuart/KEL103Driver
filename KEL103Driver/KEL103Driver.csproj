@@ -60,6 +60,8 @@
     <Compile Include="Commands\Tests\BatteryTestingCommands.cs" />
     <Compile Include="Commands\Tests\DynamicTestModeCommands.cs" />
     <Compile Include="KEL103Persistance.cs" />
+    <Compile Include="State Tracker\KEL103State.cs" />
+    <Compile Include="State Tracker\KEL103StateTracker.cs" />
     <Compile Include="KEL103Tools.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
