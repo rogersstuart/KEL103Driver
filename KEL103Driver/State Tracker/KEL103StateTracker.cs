@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net;
+using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace KEL103Driver
@@ -24,6 +26,11 @@ namespace KEL103Driver
 
         private static IPAddress address;
 
+        private static Object client_locker = new Object();
+        private static UdpClient client;
+        private static bool is_client_checked_out = false;
+
+
         public static void Start()
         {
             lock(task_locker)
@@ -36,6 +43,23 @@ namespace KEL103Driver
         public static void Stop()
         {
 
+        }
+
+        public static UdpClient CheckoutClient()
+        {
+            lock (client_locker)
+            {
+                while (is_client_checked_out)
+                    Thread.Sleep(1);
+
+                is_client_checked_out = true;
+                return client;
+            }
+        }
+
+        public static void CheckinClient()
+        {
+            is_client_checked_out = false;
         }
 
         private static Task GenerateTrackerTask()
@@ -51,38 +75,48 @@ namespace KEL103Driver
                         address = await KEL103Tools.FindLoadAddress();
 
                         //do work
-
-                        while (tracker_active)
+                        using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
                         {
-                            Stopwatch q = new Stopwatch();
-                            q.Start();
+                            KEL103Tools.ConfigureClient(address, client);
 
-                            var kel_state = new KEL103State();
+                            KEL103StateTracker.client = client;
 
-                            var voltage = await KEL103Command.MeasureVoltage(address);
-                            var current = await KEL103Command.MeasureCurrent(address);
-                            var resistance = Double.IsNaN(voltage / current) ? 0 : (voltage / current);
-                            var power = await KEL103Command.MeasurePower(address);
+                            while (tracker_active)
+                            {
+                                Stopwatch q = new Stopwatch();
+                                q.Start();
 
-                            var input_state = await KEL103Command.GetLoadInputSwitchState(address);
+                                CheckoutClient();
 
-                            var time_stame = DateTime.Now;
+                                var kel_state = new KEL103State();
 
-                            q.Stop();
+                                var voltage = await KEL103Command.MeasureVoltage(client);
+                                var current = await KEL103Command.MeasureCurrent(client);
+                                var resistance = Double.IsNaN(voltage / current) ? 0 : (voltage / current);
+                                var power = await KEL103Command.MeasurePower(client);
 
-                            var retreval_span = TimeSpan.FromTicks(q.ElapsedTicks);
+                                var input_state = await KEL103Command.GetLoadInputSwitchState(client);
 
-                            kel_state.Voltage = voltage;
-                            kel_state.Current = current;
-                            kel_state.Resistance = resistance;
-                            kel_state.Power = power;
-                            kel_state.time_stamp = time_stame;
-                            kel_state.input_state = input_state;
-                            kel_state.retreval_span = retreval_span;
+                                var time_stame = DateTime.Now;
 
-                            NewKEL103StateAvailable(kel_state);
+                                CheckinClient();
 
-                            await Task.Delay(10);
+                                q.Stop();
+
+                                var retreval_span = TimeSpan.FromTicks(q.ElapsedTicks);
+
+                                kel_state.Voltage = voltage;
+                                kel_state.Current = current;
+                                kel_state.Resistance = resistance;
+                                kel_state.Power = power;
+                                kel_state.time_stamp = time_stame;
+                                kel_state.input_state = input_state;
+                                kel_state.retreval_span = retreval_span;
+
+                                NewKEL103StateAvailable(kel_state);
+
+                                //await Task.Delay(10);
+                            }
                         }
                     }
                     catch(Exception ex)

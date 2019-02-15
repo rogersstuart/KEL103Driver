@@ -14,7 +14,13 @@ namespace KEL103DriverUtility
 {
     public partial class MainForm : Form
     {
-        Queue<double> chart_values = new Queue<double>();
+        Queue<DateTime> chart1_timestamps = new Queue<DateTime>();
+        Queue<double> chart1_values = new Queue<double>();
+
+        Queue<DateTime> chart2_timestamps = new Queue<DateTime>();
+        Queue<double> chart2_values = new Queue<double>();
+
+        int max_chart_points = 1000;
 
         KEL103State latest_state;
 
@@ -22,8 +28,11 @@ namespace KEL103DriverUtility
         {
             InitializeComponent();
 
-            chart1.ChartAreas[0].AxisX.LabelStyle.Format = "dd.hh.mm.ss.fff";
+            chart1.ChartAreas[0].AxisX.LabelStyle.Format = "dd.hh.mm.ss";
             chart1.Series[0].XValueType = ChartValueType.DateTime;
+
+            chart2.ChartAreas[0].AxisX.LabelStyle.Format = "dd.hh.mm.ss";
+            chart2.Series[0].XValueType = ChartValueType.DateTime;
         }
 
         private async void button1_Click(object sender, EventArgs e)
@@ -37,26 +46,20 @@ namespace KEL103DriverUtility
         {
             //start the state tracker
 
-            
-
-            Console.WriteLine("here");
-
             KEL103StateTracker.NewKEL103StateAvailable += a =>
             {
                 latest_state = a;
 
-                chart_values.Enqueue(a.Voltage);
+                chart1_timestamps.Enqueue(a.time_stamp);
+                chart1_values.Enqueue(a.Voltage);
 
                 Invoke((MethodInvoker)(() =>
                 {
-                    var max = chart_values.Max();
-                    var min = chart_values.Min();
+                    var max = chart1_values.Max();
+                    var min = chart1_values.Min();
 
                     button2.BackColor = a.input_state ? Color.Red : Color.Green;
                     button2.Text = a.input_state ? "Load Active" : "Load Inactive";
-
-                    Console.WriteLine(max);
-                    Console.WriteLine(min);
 
                     try
                     {
@@ -70,9 +73,14 @@ namespace KEL103DriverUtility
                             chart1.ChartAreas[0].AxisY.Maximum = 1 < max ? max : 1;
                             chart1.ChartAreas[0].AxisY.Minimum = -1 > min ? min : -1;
                         }
-                        
 
-                        chart1.Series[0].Points.AddXY(a.time_stamp, a.Voltage);
+                        chart1.Series[0].Points.DataBindXY(chart1_timestamps, chart1_values);
+
+                        while(chart1_timestamps.Count() > max_chart_points)
+                        {
+                            chart1_timestamps.Dequeue();
+                            chart1_values.Dequeue();
+                        }
                     }
                     catch(System.InvalidOperationException ex)
                     {
@@ -87,8 +95,6 @@ namespace KEL103DriverUtility
             };
 
             KEL103StateTracker.Start();
-
-            Console.WriteLine("here");
         }
 
         private void button3_Click(object sender, EventArgs e)
@@ -100,9 +106,11 @@ namespace KEL103DriverUtility
         {
             //switch load input on and off
 
-            var address = KEL103Persistance.Configuration.LoadAddress;
+            var client = KEL103StateTracker.CheckoutClient();
 
-            await KEL103Command.SetLoadInputSwitchState(address, !latest_state.input_state);
+            await KEL103Command.SetLoadInputSwitchState(client, !latest_state.input_state);
+
+            KEL103StateTracker.CheckinClient();
         }
     }
 }
