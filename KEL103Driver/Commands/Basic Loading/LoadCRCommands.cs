@@ -16,10 +16,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":RES " + KEL103Tools.FormatString(target_resistance) + "OHM\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetConstantResistanceTarget(client, target_resistance);
             }
+        }
+
+        public static async Task SetConstantResistanceTarget(UdpClient client, double target_resistance)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":RES " + KEL103Tools.FormatString(target_resistance) + "OHM\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         public static async Task<double> GetConstantResistanceTarget(IPAddress device_address)
@@ -28,14 +33,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":RES?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('O')[0]);
+                return await GetConstantResistanceTarget(client);
             }
+        }
+
+        public static async Task<double> GetConstantResistanceTarget(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":RES?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('O')[0]);
         }
     }
 }

@@ -16,10 +16,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":POW " + KEL103Tools.FormatString(target_power) + "W\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetConstantPowerTarget(client, target_power);
             }
+        }
+
+        public static async Task SetConstantPowerTarget(UdpClient client, double target_power)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":POW " + KEL103Tools.FormatString(target_power) + "W\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         public static async Task<double> GetConstantPowerTarget(IPAddress device_address)
@@ -28,14 +33,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":POW?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+                return await GetConstantPowerTarget(client);
             }
+        }
+
+        public static async Task<double> GetConstantPowerTarget(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":POW?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
         }
     }
 }

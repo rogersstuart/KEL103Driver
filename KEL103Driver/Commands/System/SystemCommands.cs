@@ -75,9 +75,7 @@ namespace KEL103Driver
 
                 var rx = (await client.ReceiveAsync()).Buffer;
 
-                Console.WriteLine(Convert.ToString(rx));
-
-                return Encoding.ASCII.GetString(rx).Split('\n')[0] == "1" ? true : false;
+                return Encoding.ASCII.GetString(rx).Split('\n')[0] == "ON" ? true : false;
             }
         }
 

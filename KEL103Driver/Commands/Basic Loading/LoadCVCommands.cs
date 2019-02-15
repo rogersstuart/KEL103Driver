@@ -16,10 +16,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":VOLT " + KEL103Tools.FormatString(target_voltage) + "V\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
+                await SetConstantVoltageTarget(client, target_voltage);
             }
+        }
+
+        public static async Task SetConstantVoltageTarget(UdpClient client, double target_voltage)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":VOLT " + KEL103Tools.FormatString(target_voltage) + "V\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
         }
 
         public static async Task<double> GetConstantVoltageTarget(IPAddress device_address)
@@ -28,14 +33,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":VOLT?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
+                return await GetConstantVoltageTarget(client);
             }
+        }
+
+        public static async Task<double> GetConstantVoltageTarget(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":VOLT?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
         }
     }
 }

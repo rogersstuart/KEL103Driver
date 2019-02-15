@@ -16,10 +16,15 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
+                await SetConstantCurrentTarget(client, target_current);
+            }
+        }
+
+        public static async Task SetConstantCurrentTarget(UdpClient client, double target_current)
+        {
                 var tx_bytes = Encoding.ASCII.GetBytes(":CURR " + KEL103Tools.FormatString(target_current) + "A\n");
 
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-            }
+                await client.SendAsync(tx_bytes, tx_bytes.Length);       
         }
 
         public static async Task<double> GetConstantCurrentTarget(IPAddress device_address)
@@ -28,14 +33,19 @@ namespace KEL103Driver
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                var tx_bytes = Encoding.ASCII.GetBytes(":CURR?\n");
-
-                await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-                var rx = (await client.ReceiveAsync()).Buffer;
-
-                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+                return await GetConstantCurrentTarget(client);
             }
+        }
+
+        public static async Task<double> GetConstantCurrentTarget(UdpClient client)
+        {
+            var tx_bytes = Encoding.ASCII.GetBytes(":CURR?\n");
+
+            await client.SendAsync(tx_bytes, tx_bytes.Length);
+
+            var rx = (await client.ReceiveAsync()).Buffer;
+
+            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
         }
     }
 }

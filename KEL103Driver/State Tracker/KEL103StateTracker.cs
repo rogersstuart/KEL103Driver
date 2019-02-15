@@ -1,21 +1,36 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace KEL103Driver
 {
+    public delegate void StateAvailable(KEL103State state);
+
     public static class KEL103StateTracker
     {
+        public static event StateAvailable NewKEL103StateAvailable;
+
         private static Object task_locker = new Object();
         private static Task state_tracker;
 
         private static bool tracker_active = false;
 
+        private static Object state_locker = new Object();
+        private static KEL103State state = null;
+
+        private static IPAddress address;
+
         public static void Start()
         {
-
+            lock(task_locker)
+            {
+                state_tracker = GenerateTrackerTask();
+                state_tracker.Start();
+            }
         }
 
         public static void Stop()
@@ -27,23 +42,53 @@ namespace KEL103Driver
         {
             return new Task(async () =>
             {
-                while(tracker_active)
+                tracker_active = true;
+
+                while (tracker_active)
                 {
                     try
                     {
+                        address = await KEL103Tools.FindLoadAddress();
+
                         //do work
 
-                        while(tracker_active)
+                        while (tracker_active)
                         {
+                            Stopwatch q = new Stopwatch();
+                            q.Start();
 
+                            var kel_state = new KEL103State();
+
+                            var voltage = await KEL103Command.MeasureVoltage(address);
+                            var current = await KEL103Command.MeasureCurrent(address);
+                            var resistance = Double.IsNaN(voltage / current) ? 0 : (voltage / current);
+                            var power = await KEL103Command.MeasurePower(address);
+
+                            var input_state = await KEL103Command.GetLoadInputSwitchState(address);
+
+                            var time_stame = DateTime.Now;
+
+                            q.Stop();
+
+                            var retreval_span = TimeSpan.FromTicks(q.ElapsedTicks);
+
+                            kel_state.Voltage = voltage;
+                            kel_state.Current = current;
+                            kel_state.Resistance = resistance;
+                            kel_state.Power = power;
+                            kel_state.time_stamp = time_stame;
+                            kel_state.input_state = input_state;
+                            kel_state.retreval_span = retreval_span;
+
+                            NewKEL103StateAvailable(kel_state);
+
+                            await Task.Delay(10);
                         }
                     }
                     catch(Exception ex)
                     {
-
+                        
                     }
-
-                    var address = KEL103Tools.FindLoadAddress();
                 }
             });
         }
