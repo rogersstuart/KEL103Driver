@@ -92,7 +92,6 @@ namespace KEL103Driver
 
                                 var voltage = await KEL103Command.MeasureVoltage(client);
                                 var current = await KEL103Command.MeasureCurrent(client);
-                                var resistance = Double.IsNaN(voltage / current) ? 0 : (voltage / current);
                                 var power = await KEL103Command.MeasurePower(client);
 
                                 var input_state = await KEL103Command.GetLoadInputSwitchState(client);
@@ -107,11 +106,10 @@ namespace KEL103Driver
 
                                 kel_state.Voltage = voltage;
                                 kel_state.Current = current;
-                                kel_state.Resistance = resistance;
                                 kel_state.Power = power;
-                                kel_state.time_stamp = time_stame;
-                                kel_state.input_state = input_state;
-                                kel_state.retreval_span = retreval_span;
+                                kel_state.TimeStamp = time_stame;
+                                kel_state.InputState = input_state;
+                                kel_state.ValueAquisitionTimespan = retreval_span;
 
                                 NewKEL103StateAvailable(kel_state);
 
