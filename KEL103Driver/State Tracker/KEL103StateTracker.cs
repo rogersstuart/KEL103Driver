@@ -20,6 +20,7 @@ namespace KEL103Driver
         private static Task state_tracker;
 
         private static bool tracker_active = false;
+        private static bool tracker_init_complete = false;
 
         private static Object state_locker = new Object();
         private static KEL103State state = null;
@@ -62,6 +63,11 @@ namespace KEL103Driver
             is_client_checked_out = false;
         }
 
+        public static bool IsInitComplete
+        {
+            get { return tracker_init_complete; }
+        }
+
         private static Task GenerateTrackerTask()
         {
             return new Task(async () =>
@@ -73,6 +79,8 @@ namespace KEL103Driver
                     try
                     {
                         address = await KEL103Tools.FindLoadAddress();
+
+                        tracker_init_complete = true;
 
                         //do work
                         using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
