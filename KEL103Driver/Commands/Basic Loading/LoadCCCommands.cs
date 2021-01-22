@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -10,12 +8,18 @@ namespace KEL103Driver
 {
     public static partial class KEL103Command
     {
+        /**
+         * Sets the constant current target value.
+         * 
+         * @param device_address The address of the device.
+         * @param target_current The the curent you'd like to set the device to.
+         * @return none
+         */
         public static async Task SetConstantCurrentTarget(IPAddress device_address, double target_current)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
-
                 await SetConstantCurrentTarget(client, target_current);
             }
         }
@@ -23,7 +27,6 @@ namespace KEL103Driver
         public static async Task SetConstantCurrentTarget(UdpClient client, double target_current)
         {
                 var tx_bytes = Encoding.ASCII.GetBytes(":CURR " + KEL103Tools.FormatString(target_current) + "A\n");
-
                 await client.SendAsync(tx_bytes, tx_bytes.Length);       
         }
 
@@ -40,9 +43,7 @@ namespace KEL103Driver
         public static async Task<double> GetConstantCurrentTarget(UdpClient client)
         {
             var tx_bytes = Encoding.ASCII.GetBytes(":CURR?\n");
-
             await client.SendAsync(tx_bytes, tx_bytes.Length);
-
             var rx = (await client.ReceiveAsync()).Buffer;
 
             return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);

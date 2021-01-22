@@ -11,12 +11,18 @@ namespace KEL103Driver
 {
     public static class KEL103Tools
     {
-        public static async Task<IPAddress> FindLoadAddress()
+        /**
+         * Search for a load on the network. Could be expanded to find all loads on the network.
+         * 
+         * @params none
+         * @return A task which will result in an IPAddress
+         */
+        public static IPAddress FindLoadAddress()
         {
             if (!KEL103Persistance.Configuration.EnableLoadSearch)
                 return KEL103Persistance.Configuration.LoadAddress;
-            
-            //get list of all network interfaces and start a search
+
+            //get list of all network interfaces
 
             var broadcast_addresses = new List<IPAddress>();
             if (KEL103Persistance.Configuration.EnableInterfaceSearch)
@@ -41,9 +47,10 @@ namespace KEL103Driver
             else
                 broadcast_addresses.Add(KEL103Persistance.Configuration.BroadcastAddress);
 
+            //begin the search
 
             var load_addresses = new List<IPAddress>();
-            foreach(var address in broadcast_addresses)
+            foreach (var address in broadcast_addresses) //send out a message on each broadcast address
             {
                 IPEndPoint search_endpoint = new IPEndPoint(address, KEL103Persistance.Configuration.BroadcastPort);
 
@@ -59,27 +66,19 @@ namespace KEL103Driver
 
                     var feed = new List<string>();
 
-                    var comm_wait = true;
-
-                    Task.Run(() =>
-                    {
-                        try
-                        {
-                            while (true)
-                            {
-
-                                var rx = udp_client.Receive(ref from);
-                                var line = Encoding.ASCII.GetString(rx);
-                                feed.AddRange(line.Split('\n'));
-                            }
-                        }
-                        catch (Exception ex) {/* looks like we timed out */ comm_wait = false; }
-                    });
-
                     udp_client.Send(tx_bytes, tx_bytes.Length, search_endpoint);
 
-                    while (comm_wait)
-                        await Task.Delay(1);
+                    try
+                    {
+                        while (true)
+                        {
+
+                            var rx = udp_client.Receive(ref from);
+                            var line = Encoding.ASCII.GetString(rx);
+                            feed.AddRange(line.Split('\n'));
+                        }
+                    }
+                    catch (Exception ex) {/* looks like we timed out */ }
 
                     udp_client.Close();
 
@@ -88,7 +87,7 @@ namespace KEL103Driver
                     foreach (var str in feed)
                         if (IPAddress.TryParse(str, out load_address))
                             load_addresses.Add(IPAddress.Parse(str));
-                }       
+                }
             }
 
             if (load_addresses.Count() == 0)
@@ -100,6 +99,8 @@ namespace KEL103Driver
 
             return load_addresses[0];
         }
+            
+            
 
         public static string FormatString(double d)
         {
