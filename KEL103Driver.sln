@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28010.2050
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KEL103Driver", "KEL103Driver\KEL103Driver.csproj", "{97A9CAA6-4270-4DAB-98B9-1B8C39539EF2}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KEL103DriverUtility", "KEL103DriverUtility\KEL103DriverUtility.csproj", "{C36885C6-E0CA-4D66-89EF-7EF52739D648}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KEL103_Server", "KEL103_TCP_SERVER\KEL103_Server.csproj", "{892BDFFB-8C8B-4DA2-BE96-920BF5B86EBC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{C36885C6-E0CA-4D66-89EF-7EF52739D648}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C36885C6-E0CA-4D66-89EF-7EF52739D648}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C36885C6-E0CA-4D66-89EF-7EF52739D648}.Release|Any CPU.Build.0 = Release|Any CPU
+		{892BDFFB-8C8B-4DA2-BE96-920BF5B86EBC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{892BDFFB-8C8B-4DA2-BE96-920BF5B86EBC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{892BDFFB-8C8B-4DA2-BE96-920BF5B86EBC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{892BDFFB-8C8B-4DA2-BE96-920BF5B86EBC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

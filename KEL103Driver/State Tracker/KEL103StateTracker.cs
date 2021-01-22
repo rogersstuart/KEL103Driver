@@ -28,7 +28,7 @@ namespace KEL103Driver
         private static IPAddress address;
 
         private static Object client_locker = new Object();
-        private static UdpClient client;
+        private static UdpClient client = null;
         private static bool is_client_checked_out = false;
 
 
@@ -48,6 +48,9 @@ namespace KEL103Driver
 
         public static UdpClient CheckoutClient()
         {
+            if (client == null)
+                throw new Exception("null client exception");
+            
             lock (client_locker)
             {
                 while (is_client_checked_out)
@@ -78,7 +81,7 @@ namespace KEL103Driver
                 {
                     try
                     {
-                        address = await KEL103Tools.FindLoadAddress();
+                        address = KEL103Tools.FindLoadAddress();
 
                         tracker_init_complete = true;
 
@@ -127,7 +130,7 @@ namespace KEL103Driver
                     }
                     catch(Exception ex)
                     {
-                        
+                        //an error occured. reinnitalize.
                     }
                 }
             });
