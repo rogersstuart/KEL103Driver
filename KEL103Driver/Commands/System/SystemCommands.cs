@@ -10,115 +10,127 @@ namespace KEL103Driver
 {
     public static partial class KEL103Command
     {
-        public static async Task<string> Identify(IPAddress device_address)
+        public static Task<string> Identify(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await Identify(client);
+                return Identify(client);
             }
         }
 
-        public static async Task<string> Identify(UdpClient client)
+        public static Task<string> Identify(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes("*IDN?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes("*IDN?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Encoding.ASCII.GetString(rx).Split('\n')[0];
+                return Encoding.ASCII.GetString(rx).Split('\n')[0];
+            });
         }
 
-        public static async Task StoreToUnit(IPAddress device_address, int location_index)
+        public static Task StoreToUnit(IPAddress device_address, int location_index)
+        {
+            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
+            {
+                KEL103Tools.ConfigureClient(device_address, client);
+                return StoreToUnit(client, location_index);
+            }
+        }
+
+        public static Task StoreToUnit(UdpClient client, int location_index)
+        {
+            return Task.Run(() => {
+                var tx_bytes = Encoding.ASCII.GetBytes("*SAV " + location_index + "\n");
+
+                client.Send(tx_bytes, tx_bytes.Length);
+            });
+        }
+
+        public static Task RecallToUnit(IPAddress device_address, int location_index)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-
-                await StoreToUnit(client, location_index);
+                return RecallToUnit(client, location_index);
             }
         }
 
-        public static async Task StoreToUnit(UdpClient client, int location_index)
+        public static Task RecallToUnit(UdpClient client, int location_index)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes("*SAV " + location_index + "\n");
+            return Task.Run(() => {
+                var tx_bytes = Encoding.ASCII.GetBytes("*RCL " + location_index + "\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
+            });
         }
 
-        public static async Task RecallToUnit(IPAddress device_address, int location_index)
+        public static Task SetLoadInputSwitchState(IPAddress device_address, bool switch_state) //true is on, false is off
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                await RecallToUnit(client, location_index);
+                return SetLoadInputSwitchState(client, switch_state);
             }
         }
 
-        public static async Task RecallToUnit(UdpClient client, int location_index)
+        public static Task SetLoadInputSwitchState(UdpClient client, bool switch_state) //true is on, false is off
         {
-            var tx_bytes = Encoding.ASCII.GetBytes("*RCL " + location_index + "\n");
+            return Task.Run(() => {
+                var tx_bytes = Encoding.ASCII.GetBytes(":INP " + (switch_state ? "ON" : "OFF") + "\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
+            });
         }
 
-        public static async Task SetLoadInputSwitchState(IPAddress device_address, bool switch_state) //true is on, false is off
+        public static Task<bool> GetLoadInputSwitchState(IPAddress device_address)  //true is on, false is off
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                await SetLoadInputSwitchState(client, switch_state);
+                return GetLoadInputSwitchState(client);
             }
         }
 
-        public static async Task SetLoadInputSwitchState(UdpClient client, bool switch_state) //true is on, false is off
+        public static Task<bool> GetLoadInputSwitchState(UdpClient client)  //true is on, false is off
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":INP " + (switch_state ? "ON" : "OFF") + "\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":INP?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
+
+                var rx = client.Receive(ref endpoint);
+
+                return Encoding.ASCII.GetString(rx).Split('\n')[0] == "ON" ? true : false;
+            });
         }
 
-        public static async Task<bool> GetLoadInputSwitchState(IPAddress device_address)  //true is on, false is off
+        public static Task SimulateTrigger(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetLoadInputSwitchState(client);
+                return SimulateTrigger(client);
             }
         }
 
-        public static async Task<bool> GetLoadInputSwitchState(UdpClient client)  //true is on, false is off
+        public static Task SimulateTrigger(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":INP?\n");
+            return Task.Run(() => {
+                var tx_bytes = Encoding.ASCII.GetBytes("*TRG\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
-
-            var rx = (await client.ReceiveAsync()).Buffer;
-
-            return Encoding.ASCII.GetString(rx).Split('\n')[0] == "ON" ? true : false;
-        }
-
-        public static async Task SimulateTrigger(IPAddress device_address)
-        {
-            using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
-            {
-                KEL103Tools.ConfigureClient(device_address, client);
-
-                await SimulateTrigger(client);
-            }
-        }
-
-        public static async Task SimulateTrigger(UdpClient client)
-        {
-            var tx_bytes = Encoding.ASCII.GetBytes("*TRG\n");
-
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
+            });
         }
 
         /*

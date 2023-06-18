@@ -53,8 +53,8 @@ namespace KEL103Driver
             
             lock (client_locker)
             {
-                while (is_client_checked_out)
-                    Thread.Sleep(1);
+                //while (is_client_checked_out)
+                //    Thread.Sleep(1);
 
                 is_client_checked_out = true;
                 return client;
@@ -77,13 +77,15 @@ namespace KEL103Driver
             {
                 tracker_active = true;
 
+                address = KEL103Tools.FindLoadAddress();
+
+                tracker_init_complete = true;
+
                 while (tracker_active)
                 {
                     try
                     {
-                        address = KEL103Tools.FindLoadAddress();
-
-                        tracker_init_complete = true;
+                        
 
                         //do work
                         using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
@@ -101,7 +103,7 @@ namespace KEL103Driver
 
                                 var kel_state = new KEL103State();
 
-                                var voltage = await KEL103Command.MeasureVoltage(client);
+                                var voltage =  await KEL103Command.MeasureVoltage(client);
                                 var current = await KEL103Command.MeasureCurrent(client);
                                 var power = await KEL103Command.MeasurePower(client);
 
@@ -122,9 +124,9 @@ namespace KEL103Driver
                                 kel_state.InputState = input_state;
                                 kel_state.ValueAquisitionTimespan = retreval_span;
 
-                                NewKEL103StateAvailable(kel_state);
+                                Task.Run(() => {  NewKEL103StateAvailable(kel_state); });
 
-                                //await Task.Delay(10);
+                                await Task.Delay(100);
                             }
                         }
                     }

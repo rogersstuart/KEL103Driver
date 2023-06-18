@@ -11,107 +11,120 @@ namespace KEL103Driver
     public static partial class KEL103Command
     {
         
-        public static async Task RecallBatteryTestModeParameters(IPAddress device_address, int list_index)
+        public static Task RecallBatteryTestModeParameters(IPAddress device_address, int list_index)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                await RecallBatteryTestModeParameters(client, list_index);
+                return RecallBatteryTestModeParameters(client, list_index);
             }
         }
 
-        public static async Task RecallBatteryTestModeParameters(UdpClient client, int list_index)
+        public static Task RecallBatteryTestModeParameters(UdpClient client, int list_index)
         {
+            return Task.Run(() => { 
             var tx_bytes = Encoding.ASCII.GetBytes(":RCL:BATT " + list_index + "\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+             client.Send(tx_bytes, tx_bytes.Length);
+            });
         }
 
         //recall before querying
-        public static async Task<string> QueryBatteryTestModeParameters(IPAddress device_address, int list_index)
+        public static Task<string> QueryBatteryTestModeParameters(IPAddress device_address, int list_index)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await QueryBatteryTestModeParameters(client, list_index);
+                return QueryBatteryTestModeParameters(client, list_index);
             }
         }
 
         //recall before querying
-        public static async Task<string> QueryBatteryTestModeParameters(UdpClient client, int list_index)
+        public static Task<string> QueryBatteryTestModeParameters(UdpClient client, int list_index)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":RCL:BATT?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":RCL:BATT?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                 client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Encoding.ASCII.GetString(rx);
+                return Encoding.ASCII.GetString(rx);
+            });
         }
 
-        public static async Task SetBatteryTestModeParameters(IPAddress device_address, int list_index, double current_range,
+        public static Task SetBatteryTestModeParameters(IPAddress device_address, int list_index, double current_range,
             double discharge_current, double cutoff_voltage, double cutoff_capacity, double discharge_time)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                await SetBatteryTestModeParameters(client, list_index, current_range, discharge_current, cutoff_voltage, cutoff_capacity, discharge_time);
+                return SetBatteryTestModeParameters(client, list_index, current_range, discharge_current, cutoff_voltage, cutoff_capacity, discharge_time);
             }
         }
 
-        public static async Task SetBatteryTestModeParameters(UdpClient client, int list_index, double current_range,
+        public static Task SetBatteryTestModeParameters(UdpClient client, int list_index, double current_range,
             double discharge_current, double cutoff_voltage, double cutoff_capacity, double discharge_time)
         {
+            return Task.Run(() => { 
             var tx_bytes = Encoding.ASCII.GetBytes(":BATT " + list_index + "," + KEL103Tools.FormatString(current_range) +
                 "A," + KEL103Tools.FormatString(discharge_current) + "A," + KEL103Tools.FormatString(cutoff_voltage) +
                 "V," + KEL103Tools.FormatString(cutoff_capacity) + "AH," + KEL103Tools.FormatString(discharge_time) + "S\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+             client.Send(tx_bytes, tx_bytes.Length);
+            });
         }
 
-        public static async Task<double> QueryBatteryTestTimer(IPAddress device_address)
+        public static Task<double> QueryBatteryTestTimer(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await QueryBatteryTestTimer(client);
+                return QueryBatteryTestTimer(client);
             }
         }
 
-        public static async Task<double> QueryBatteryTestTimer(UdpClient client)
+        public static Task<double> QueryBatteryTestTimer(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":BATT:TIM?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":BATT:TIM?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                 client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('S')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('S')[0]);
+            });
         }
 
-        public static async Task<double> QueryBatteryTestCapacityCounter(IPAddress device_address)
+        public static Task<double> QueryBatteryTestCapacityCounter(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await QueryBatteryTestCapacityCounter(client);
+                return QueryBatteryTestCapacityCounter(client);
             }
         }
 
-        public static async Task<double> QueryBatteryTestCapacityCounter(UdpClient client)
+        public static Task<double> QueryBatteryTestCapacityCounter(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":BATT:CAP?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint; 
+                var tx_bytes = Encoding.ASCII.GetBytes(":BATT:CAP?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                 client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+            });
         }
     }
 }

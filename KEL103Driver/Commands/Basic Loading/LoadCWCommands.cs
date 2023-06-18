@@ -10,42 +10,47 @@ namespace KEL103Driver
 {
     public static partial class KEL103Command
     {
-        public static async Task SetConstantPowerTarget(IPAddress device_address, double target_power)
+        public static Task SetConstantPowerTarget(IPAddress device_address, double target_power)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                await SetConstantPowerTarget(client, target_power);
+                return SetConstantPowerTarget(client, target_power);
             }
         }
 
-        public static async Task SetConstantPowerTarget(UdpClient client, double target_power)
+        public static Task SetConstantPowerTarget(UdpClient client, double target_power)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":POW " + KEL103Tools.FormatString(target_power) + "W\n");
+            return Task.Run(() => { 
+                var tx_bytes = Encoding.ASCII.GetBytes(":POW " + KEL103Tools.FormatString(target_power) + "W\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
+            });
         }
 
-        public static async Task<double> GetConstantPowerTarget(IPAddress device_address)
+        public static Task<double> GetConstantPowerTarget(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetConstantPowerTarget(client);
+                return GetConstantPowerTarget(client);
             }
         }
 
-        public static async Task<double> GetConstantPowerTarget(UdpClient client)
+        public static Task<double> GetConstantPowerTarget(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":POW?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":POW?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+            });
         }
     }
 }

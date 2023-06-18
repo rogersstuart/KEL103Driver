@@ -19,8 +19,8 @@ namespace KEL103Driver
         public int BroadcastPort { get; set; } = 18191;
         public int CommandPort { get; set; } = 18190;
         public string SearchMessageString { get; set; } = "find_ka000";
-        public int ReadTimeout { get; set; } = 2000;
-        public int WriteTimeout { get; set; } = 2000;
+        public int ReadTimeout { get; set; } = 200;
+        public int WriteTimeout { get; set; } = 200;
         public bool EnableInterfaceSearch { get; set; } = true;
         public bool EnableLoadSearch { get; set; } = true;
 

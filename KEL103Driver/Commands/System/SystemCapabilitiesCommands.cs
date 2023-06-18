@@ -10,172 +10,196 @@ namespace KEL103Driver
 {
     public static partial class KEL103Command
     {
-        public static async Task<double> GetMaximumSupportedSystemInputVoltage(IPAddress device_address)
+        public static Task<double> GetMaximumSupportedSystemInputVoltage(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMaximumSupportedSystemInputVoltage(client);
+                return GetMaximumSupportedSystemInputVoltage(client);
             }
         }
 
-        public static async Task<double> GetMaximumSupportedSystemInputVoltage(UdpClient client)
+        public static Task<double> GetMaximumSupportedSystemInputVoltage(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":VOLT:UPP?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":VOLT:UPP?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
+            });
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputVoltage(IPAddress device_address)
+        public static Task<double> GetMinimumSupportedSystemInputVoltage(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMinimumSupportedSystemInputVoltage(client);
+                return GetMinimumSupportedSystemInputVoltage(client);
             }
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputVoltage(UdpClient client)
+        public static Task<double> GetMinimumSupportedSystemInputVoltage(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":VOLT:LOW?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":VOLT:LOW?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
+            });
         }
 
-        public static async Task<double> GetMaximumSupportedSystemInputCurrent(IPAddress device_address)
+        public static Task<double> GetMaximumSupportedSystemInputCurrent(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMaximumSupportedSystemInputCurrent(client);
+                return GetMaximumSupportedSystemInputCurrent(client);
             }
         }
 
-        public static async Task<double> GetMaximumSupportedSystemInputCurrent(UdpClient client)
+        public static Task<double> GetMaximumSupportedSystemInputCurrent(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":CURR:UPP?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":CURR:UPP?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+            });
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputCurrent(IPAddress device_address)
+        public static Task<double> GetMinimumSupportedSystemInputCurrent(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMinimumSupportedSystemInputCurrent(client);
+                return GetMinimumSupportedSystemInputCurrent(client);
             }
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputCurrent(UdpClient client)
+        public static Task<double> GetMinimumSupportedSystemInputCurrent(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":CURR:LOW?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":CURR:LOW?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+            });
         }
 
-        public static async Task<double> GetMaximumSupportedSystemInputResistance(IPAddress device_address)
+        public static Task<double> GetMaximumSupportedSystemInputResistance(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMaximumSupportedSystemInputResistance(client);
+                return GetMaximumSupportedSystemInputResistance(client);
             }
         }
 
-        public static async Task<double> GetMaximumSupportedSystemInputResistance(UdpClient client)
+        public static Task<double> GetMaximumSupportedSystemInputResistance(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":RES:UPP?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":RES:UPP?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('O')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('O')[0]);
+            });
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputResistance(IPAddress device_address)
+        public static Task<double> GetMinimumSupportedSystemInputResistance(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMinimumSupportedSystemInputResistance(client);
+                return GetMinimumSupportedSystemInputResistance(client);
             }
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputResistance(UdpClient client)
+        public static Task<double> GetMinimumSupportedSystemInputResistance(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":RES:LOW?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":RES:LOW?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('O')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('O')[0]);
+            });
         }
 
-        public static async Task<double> GetMaximumSupportedSystemInputPower(IPAddress device_address)
+        public static Task<double> GetMaximumSupportedSystemInputPower(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMaximumSupportedSystemInputPower(client);
+                return GetMaximumSupportedSystemInputPower(client);
             }
         }
 
-        public static async Task<double> GetMaximumSupportedSystemInputPower(UdpClient client)
+        public static Task<double> GetMaximumSupportedSystemInputPower(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":POW:UPP?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":POW:UPP?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+            });
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputPower(IPAddress device_address)
+        public static Task<double> GetMinimumSupportedSystemInputPower(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetMinimumSupportedSystemInputPower(client);
+                return GetMinimumSupportedSystemInputPower(client);
             }
         }
 
-        public static async Task<double> GetMinimumSupportedSystemInputPower(UdpClient client)
+        public static Task<double> GetMinimumSupportedSystemInputPower(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":POW:LOW?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":POW:LOW?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+            });
         }
     }
 }

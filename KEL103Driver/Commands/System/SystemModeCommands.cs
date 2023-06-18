@@ -25,43 +25,48 @@ namespace KEL103Driver
 
         private static readonly string[] mode_conversion_strings = { "CV","CC","CR","CW","SHORt"};
 
-        public static async Task<int> GetSystemMode(IPAddress device_address)
+        public static Task<int> GetSystemMode(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await GetSystemMode(client);
+                return GetSystemMode(client);
             }
         }
 
-        public static async Task<int> GetSystemMode(UdpClient client)
+        public static Task<int> GetSystemMode(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":FUNC?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                var tx_bytes = Encoding.ASCII.GetBytes(":FUNC?\n");
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            return mode_conversion_strings.Select((x, i) => new { x, i })
-                .Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
+                var rx = client.Receive(ref endpoint);
+
+                return mode_conversion_strings.Select((x, i) => new { x, i }).Where(y => y.x.Equals(Encoding.ASCII.GetString(rx).Split('\n')[0])).ToArray()[0].i;
+            });
         }
 
-        public static async Task SetSystemMode(IPAddress device_address, int mode)
+        public static Task SetSystemMode(IPAddress device_address, int mode)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                await SetSystemMode(client, mode);
+                return SetSystemMode(client, mode);
             }
         }
 
-        public static async Task SetSystemMode(UdpClient client, int mode)
+        public static Task SetSystemMode(UdpClient client, int mode)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":FUNC " + mode_conversion_strings[mode] + "\n");
+            return Task.Run(() => { 
+                var tx_bytes = Encoding.ASCII.GetBytes(":FUNC " + mode_conversion_strings[mode] + "\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
+            });
         }
     }
 }

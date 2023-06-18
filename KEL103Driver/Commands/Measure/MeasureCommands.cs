@@ -10,67 +10,76 @@ namespace KEL103Driver
 {
     public static partial class KEL103Command
     {
-        public static async Task<double> MeasureVoltage(IPAddress device_address)
+        public static Task<double> MeasureVoltage(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await MeasureVoltage(client);
+                return MeasureVoltage(client);
             }
         }
 
-        public static async Task<double> MeasureVoltage(UdpClient client)
+        public static Task<double> MeasureVoltage(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":MEAS:VOLT?\n");
+            return Task.Run(() => { 
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":MEAS:VOLT?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('V')[0]);
+            });
         }
 
-        public static async Task<double> MeasureCurrent(IPAddress device_address)
+        public static Task<double> MeasureCurrent(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await MeasureCurrent(client);
+                return MeasureCurrent(client);
             }
         }
 
-        public static async Task<double> MeasureCurrent(UdpClient client)
+        public static Task<double> MeasureCurrent(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":MEAS:CURR?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":MEAS:CURR?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('A')[0]);
+            });
         }
 
-        public static async Task<double> MeasurePower(IPAddress device_address)
+        public static Task<double> MeasurePower(IPAddress device_address)
         {
             using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
             {
                 KEL103Tools.ConfigureClient(device_address, client);
 
-                return await MeasurePower(client);
+                return MeasurePower(client);
             }
         }
 
-        public static async Task<double> MeasurePower(UdpClient client)
+        public static Task<double> MeasurePower(UdpClient client)
         {
-            var tx_bytes = Encoding.ASCII.GetBytes(":MEAS:POW?\n");
+            return Task.Run(() => {
+                var endpoint = client.Client.RemoteEndPoint as IPEndPoint;
+                var tx_bytes = Encoding.ASCII.GetBytes(":MEAS:POW?\n");
 
-            await client.SendAsync(tx_bytes, tx_bytes.Length);
+                client.Send(tx_bytes, tx_bytes.Length);
 
-            var rx = (await client.ReceiveAsync()).Buffer;
+                var rx = client.Receive(ref endpoint);
 
-            return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+                return Convert.ToDouble(Encoding.ASCII.GetString(rx).Split('W')[0]);
+            });
         }
 
         /*

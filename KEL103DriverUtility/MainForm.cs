@@ -7,8 +7,10 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
+using System.Collections.Concurrent;
 
 namespace KEL103DriverUtility
 {
@@ -16,7 +18,10 @@ namespace KEL103DriverUtility
     {
         int max_chart_points = 1000;
 
+        ConcurrentQueue<KEL103State> new_kel103_states = new ConcurrentQueue<KEL103State>();
         Queue<KEL103State> kel103_states = new Queue<KEL103State>();
+
+        Task uiRefresh = null;
 
         Chart[] charts;
         TextBox[][] text_boxes;
@@ -49,6 +54,22 @@ namespace KEL103DriverUtility
                 c.ChartAreas[0].AxisX.LabelStyle.Format = "dd.hh.mm.ss";
                 c.Series[0].XValueType = ChartValueType.DateTime;
             }
+
+            Show();
+
+            uiRefresh = Task.Run(async () => {
+                while (true)
+                {
+                    if (new_kel103_states.Count() > 0)
+                    {
+                        refreshTask();
+                        //Thread.Sleep(100);
+                    }
+                    else
+                        await Task.Delay(10);
+                }
+            });
+            //uiRefresh.Start();
         }
 
         //helps to prevent flicker
@@ -62,31 +83,53 @@ namespace KEL103DriverUtility
             }
         }
         
+
         private async void connectToolStripMenuItem_Click(object sender, EventArgs e)
         {
             //start the state tracker
+            await Task.Run(async () => {
 
-            KEL103StateTracker.NewKEL103StateAvailable += a => onNewState_refresh(a);
+                KEL103StateTracker.NewKEL103StateAvailable += a => onNewState_refresh(a);
 
-            KEL103StateTracker.Start();
+                KEL103StateTracker.Start();
 
-            while(!KEL103StateTracker.IsInitComplete)
-                await Task.Delay(1);
+                while(!KEL103StateTracker.IsInitComplete)
+                    await Task.Delay(1);
 
-            var client = KEL103StateTracker.CheckoutClient();
-            var mode = await KEL103Command.GetSystemMode(client);
-            KEL103StateTracker.CheckinClient();
+                var client = KEL103StateTracker.CheckoutClient();
+                var mode = await KEL103Command.GetSystemMode(client);
+                KEL103StateTracker.CheckinClient();
 
-            comboBox1.SelectedIndex = mode;
-            comboBox2.SelectedIndex = 1;
-            comboBox3.SelectedIndex = 0;
+                Invoke((MethodInvoker)(() =>
+                {
+                    comboBox1.SelectedIndex = mode;
+                    comboBox2.SelectedIndex = 1;
+                    comboBox3.SelectedIndex = 0;
 
-            foreach (Control c in Controls)
-                c.Enabled = true;
+                    foreach (Control c in Controls)
+                        c.Enabled = true;
+                }));
+            });
         }
 
         private void onNewState_refresh(KEL103State a)
         {
+            new_kel103_states.Enqueue(a);
+            Console.WriteLine(new_kel103_states.Count());
+        }
+
+        private void refreshTask()
+        {
+            while (new_kel103_states.Count() > 0)
+            {
+                KEL103State result = null;
+                bool safe = new_kel103_states.TryDequeue(out result);
+                if (safe)
+                    kel103_states.Enqueue(result);
+            }
+
+            var a = kel103_states.Last();
+
             Invoke((MethodInvoker)(() =>
             {
                 button2.BackColor = a.InputState ? Color.Red : Color.Green;
@@ -94,8 +137,6 @@ namespace KEL103DriverUtility
 
                 toolStripStatusLabel1.Text = a.ValueAquisitionTimespan.ToString();
             }));
-
-            kel103_states.Enqueue(a);
 
             Parallel.For(0, 2, i =>
             {
@@ -110,12 +151,12 @@ namespace KEL103DriverUtility
                     timestamp_queue.Clear();
 
                     //Invoke((MethodInvoker)(() => c.Series[0].Points.Clear()));
-                        
 
                     var cvt = channel_value_type[i];
                     foreach (var kel103val in kel103_states)
                     {
-                        var value = new Func<dynamic>(() => {
+                        var value = new Func<dynamic>(() =>
+                        {
                             switch (cvt)
                             {
                                 case 0: return a.Voltage;
@@ -131,8 +172,6 @@ namespace KEL103DriverUtility
 
                     channel_value_type_invalid[i] = false;
                 }
-
-                
 
                 while (kel103_states.Count() > max_chart_points)
                     kel103_states.Dequeue();
@@ -175,19 +214,20 @@ namespace KEL103DriverUtility
                             c.ChartAreas[0].AxisY.Minimum = -1;
                         }
                     }
+                }));
+                //});
 
-                    while (timestamp_queue.Count() > max_chart_points)
-                    {
-                        timestamp_queue.Dequeue();
-                        value_queue.Dequeue();
-                    }
+                while (timestamp_queue.Count() > max_chart_points)
+                {
+                    timestamp_queue.Dequeue();
+                    value_queue.Dequeue();
+                }
+
+                Invoke((MethodInvoker)(() =>
+                {
+                    Update();
                 }));
             });
-
-            Invoke((MethodInvoker)(() =>
-            {
-                Refresh();
-            }));
         }
 
         private async void button2_Click(object sender, EventArgs e)
