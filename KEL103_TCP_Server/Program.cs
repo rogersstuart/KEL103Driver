@@ -57,17 +57,19 @@ namespace KEL103_Server
                 byte[] bytes = new Byte[1024];
 
                 IPHostEntry ipHostInfo = Dns.GetHostEntry(Dns.GetHostName());
-                IPAddress ipAddress = ipHostInfo.AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToArray()[0];
-                Console.WriteLine("My IP is " + ipAddress.ToString());
+                var addresses = ipHostInfo.AddressList.Where(x => x.AddressFamily == AddressFamily.InterNetwork).ToArray();
+                //Console.WriteLine("Your addresses are:");
+                //foreach (var address in addresses)
+                //    Console.Write(address.ToString() + " ");
 
-                IPEndPoint localEndPoint = new IPEndPoint(ipAddress, 5025);
+                IPEndPoint localEndPoint = new IPEndPoint(IPAddress.Any, 5025);
 
                 // Bind the socket to the local endpoint and
                 // listen for incoming connections.  
                 try
                 {
                     // Create a TCP/IP socket.  
-                    using (Socket listener = new Socket(ipAddress.AddressFamily,
+                    using (Socket listener = new Socket(addresses[0].AddressFamily,
                         SocketType.Stream, ProtocolType.Tcp))
                     {
                         listener.Bind(localEndPoint);
