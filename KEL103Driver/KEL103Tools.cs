@@ -22,8 +22,6 @@ namespace KEL103Driver
             if (!KEL103Persistance.Configuration.EnableLoadSearch)
                 return KEL103Persistance.Configuration.LoadAddress;
 
-            //get list of all network interfaces
-
             var broadcast_addresses = new List<IPAddress>();
             if (KEL103Persistance.Configuration.EnableInterfaceSearch)
             {
@@ -31,67 +29,92 @@ namespace KEL103Driver
                 {
                     try
                     {
-                        if (nic.OperationalStatus == OperationalStatus.Up)
+                        if (nic.OperationalStatus == OperationalStatus.Up && 
+                            nic.NetworkInterfaceType != NetworkInterfaceType.Loopback)
                         {
-                            var parts = nic.GetIPProperties().UnicastAddresses[1].Address.ToString().Split('.');
-                            parts[3] = "255";
-                            broadcast_addresses.Add(IPAddress.Parse(parts[0] + "." + parts[1] + "." + parts[2] + "." + parts[3]));
+                            var ipProps = nic.GetIPProperties();
+                            foreach (var unicastAddress in ipProps.UnicastAddresses)
+                            {
+                                if (unicastAddress.Address.AddressFamily == AddressFamily.InterNetwork)
+                                {
+                                    // Calculate broadcast address using subnet mask
+                                    var ipBytes = unicastAddress.Address.GetAddressBytes();
+                                    var maskBytes = unicastAddress.IPv4Mask.GetAddressBytes();
+                                    var broadcastBytes = new byte[4];
+                                    for (int i = 0; i < 4; i++)
+                                    {
+                                        broadcastBytes[i] = (byte)(ipBytes[i] | ~maskBytes[i]);
+                                    }
+                                    broadcast_addresses.Add(new IPAddress(broadcastBytes));
+                                }
+                            }
                         }
                     }
                     catch (Exception ex)
                     {
-
+                        System.Diagnostics.Debug.WriteLine($"Interface error: {ex.Message}");
                     }
                 }
             }
             else
+            {
                 broadcast_addresses.Add(KEL103Persistance.Configuration.BroadcastAddress);
+            }
 
-            //begin the search
+            if (broadcast_addresses.Count == 0)
+            {
+                throw new Exception("No valid network interfaces found");
+            }
 
             var load_addresses = new List<IPAddress>();
-            foreach (var address in broadcast_addresses) //send out a message on each broadcast address
+            foreach (var address in broadcast_addresses)
             {
                 IPEndPoint search_endpoint = new IPEndPoint(address, KEL103Persistance.Configuration.BroadcastPort);
-
                 var tx_bytes = KEL103Persistance.Configuration.SearchMessage;
 
-                using (UdpClient udp_client = new UdpClient())
+                using (UdpClient udp_client = new UdpClient(0)) // Bind to random port
                 {
-                    udp_client.Client.Bind(new IPEndPoint(IPAddress.Any, KEL103Persistance.Configuration.BroadcastPort));
-                    var from = new IPEndPoint(0, 0);
-
-                    udp_client.Client.ReceiveTimeout = KEL103Persistance.Configuration.ReadTimeout;
-                    udp_client.Client.SendTimeout = KEL103Persistance.Configuration.WriteTimeout;
-
-                    var feed = new List<string>();
-
-                    udp_client.Send(tx_bytes, tx_bytes.Length, search_endpoint);
-
                     try
                     {
-                        while (true)
-                        {
+                        udp_client.EnableBroadcast = true;
+                        udp_client.Client.ReceiveTimeout = KEL103Persistance.Configuration.ReadTimeout;
+                        udp_client.Client.SendTimeout = KEL103Persistance.Configuration.WriteTimeout;
 
-                            var rx = udp_client.Receive(ref from);
-                            var line = Encoding.ASCII.GetString(rx);
-                            feed.AddRange(line.Split('\n'));
+                        var feed = new List<string>();
+                        udp_client.Send(tx_bytes, tx_bytes.Length, search_endpoint);
+
+                        try
+                        {
+                            IPEndPoint from = null;
+                            while (true)
+                            {
+                                var rx = udp_client.Receive(ref from);
+                                var line = Encoding.ASCII.GetString(rx);
+                                feed.AddRange(line.Split('\n'));
+                            }
+                        }
+                        catch (SocketException ex) when (ex.SocketErrorCode == SocketError.TimedOut) 
+                        { 
+                            // Expected timeout
+                        }
+
+                        foreach (var str in feed.Where(s => !string.IsNullOrWhiteSpace(s)))
+                        {
+                            if (IPAddress.TryParse(str, out var load_address))
+                            {
+                                load_addresses.Add(load_address);
+                            }
                         }
                     }
-                    catch (Exception ex) {/* looks like we timed out */ }
-
-                    udp_client.Close();
-
-                    //find the ip address
-                    IPAddress load_address = null;
-                    foreach (var str in feed)
-                        if (IPAddress.TryParse(str, out load_address))
-                            load_addresses.Add(IPAddress.Parse(str));
+                    catch (Exception ex)
+                    {
+                        System.Diagnostics.Debug.WriteLine($"Search error on {address}: {ex.Message}");
+                    }
                 }
             }
 
-            if (load_addresses.Count() == 0)
-                throw new Exception("couldn't find a valid load address");
+            if (load_addresses.Count == 0)
+                throw new Exception("Couldn't find a valid load address");
 
             var cfg = KEL103Persistance.Configuration;
             cfg.LoadAddressString = load_addresses[0].ToString();

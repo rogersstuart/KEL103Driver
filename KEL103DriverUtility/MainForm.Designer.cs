@@ -28,6 +28,41 @@
         /// </summary>
         private void InitializeComponent()
         {
+
+            this.lblCCTarget = new System.Windows.Forms.Label();
+            this.txtCCTarget = new System.Windows.Forms.TextBox();
+            this.btnCCSet = new System.Windows.Forms.Button();
+            this.btnCCGet = new System.Windows.Forms.Button();
+            this.lblCCCurrent = new System.Windows.Forms.Label();
+            this.txtCCCurrent = new System.Windows.Forms.TextBox();
+
+            // Constant Voltage controls
+            this.lblCVTarget = new System.Windows.Forms.Label();
+            this.txtCVTarget = new System.Windows.Forms.TextBox();
+            this.btnCVSet = new System.Windows.Forms.Button();
+            this.btnCVGet = new System.Windows.Forms.Button();
+            this.lblCVCurrent = new System.Windows.Forms.Label();
+            this.txtCVCurrent = new System.Windows.Forms.TextBox();
+
+            // Constant Resistance controls
+            this.lblCRTarget = new System.Windows.Forms.Label();
+            this.txtCRTarget = new System.Windows.Forms.TextBox();
+            this.btnCRSet = new System.Windows.Forms.Button();
+            this.btnCRGet = new System.Windows.Forms.Button();
+            this.lblCRCurrent = new System.Windows.Forms.Label();
+            this.txtCRCurrent = new System.Windows.Forms.TextBox();
+
+            // Constant Power controls
+            this.lblCWTarget = new System.Windows.Forms.Label();
+            this.txtCWTarget = new System.Windows.Forms.TextBox();
+            this.btnCWSet = new System.Windows.Forms.Button();
+            this.btnCWGet = new System.Windows.Forms.Button();
+            this.lblCWCurrent = new System.Windows.Forms.Label();
+            this.txtCWCurrent = new System.Windows.Forms.TextBox();
+
+ 
+
+
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
             System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
@@ -315,9 +350,24 @@
             // 
             // tableLayoutPanel16
             // 
-            this.tableLayoutPanel16.ColumnCount = 2;
-            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel16.ColumnCount = 5;
+            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel16.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.lblCCTarget = new System.Windows.Forms.Label();
+            this.tableLayoutPanel16.Controls.Add(this.lblCCTarget, 0, 0);
+            this.txtCCTarget = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel16.Controls.Add(this.txtCCTarget, 1, 0);
+            this.btnCCSet = new System.Windows.Forms.Button();
+            this.tableLayoutPanel16.Controls.Add(this.btnCCSet, 2, 0);
+            this.btnCCGet = new System.Windows.Forms.Button();
+            this.tableLayoutPanel16.Controls.Add(this.btnCCGet, 3, 0);
+            this.lblCCCurrent = new System.Windows.Forms.Label();
+            this.tableLayoutPanel16.Controls.Add(this.lblCCCurrent, 0, 1);
+            this.txtCCCurrent = new System.Windows.Forms.TextBox();
+            this.tableLayoutPanel16.Controls.Add(this.txtCCCurrent, 1, 1);
             this.tableLayoutPanel16.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel16.Location = new System.Drawing.Point(4, 5);
             this.tableLayoutPanel16.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -327,6 +377,72 @@
             this.tableLayoutPanel16.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel16.Size = new System.Drawing.Size(1214, 111);
             this.tableLayoutPanel16.TabIndex = 0;
+            // 
+            // lblCCTarget
+            // 
+            this.lblCCTarget.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCCTarget.AutoSize = true;
+            this.lblCCTarget.Location = new System.Drawing.Point(4, 17);
+            this.lblCCTarget.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCCTarget.Name = "lblCCTarget";
+            this.lblCCTarget.Size = new System.Drawing.Size(138, 20);
+            this.lblCCTarget.TabIndex = 0;
+            this.lblCCTarget.Text = "Target Current (A):";
+            // 
+            // txtCCTarget
+            // 
+            this.txtCCTarget.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.txtCCTarget.Location = new System.Drawing.Point(150, 14);
+            this.txtCCTarget.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCCTarget.Name = "txtCCTarget";
+            this.txtCCTarget.Size = new System.Drawing.Size(148, 26);
+            this.txtCCTarget.TabIndex = 1;
+            // 
+            // btnCCSet
+            // 
+            this.btnCCSet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCCSet.Location = new System.Drawing.Point(306, 10);
+            this.btnCCSet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCCSet.Name = "btnCCSet";
+            this.btnCCSet.Size = new System.Drawing.Size(75, 35);
+            this.btnCCSet.TabIndex = 2;
+            this.btnCCSet.Text = "Set";
+            this.btnCCSet.UseVisualStyleBackColor = true;
+            this.btnCCSet.Click += new System.EventHandler(this.btnCCSet_Click);
+            // 
+            // btnCCGet
+            // 
+            this.btnCCGet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCCGet.Location = new System.Drawing.Point(389, 10);
+            this.btnCCGet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCCGet.Name = "btnCCGet";
+            this.btnCCGet.Size = new System.Drawing.Size(75, 35);
+            this.btnCCGet.TabIndex = 3;
+            this.btnCCGet.Text = "Get";
+            this.btnCCGet.UseVisualStyleBackColor = true;
+            this.btnCCGet.Click += new System.EventHandler(this.btnCCGet_Click);
+            // 
+            // lblCCCurrent
+            // 
+            this.lblCCCurrent.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCCCurrent.AutoSize = true;
+            this.lblCCCurrent.Location = new System.Drawing.Point(30, 73);
+            this.lblCCCurrent.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCCCurrent.Name = "lblCCCurrent";
+            this.lblCCCurrent.Size = new System.Drawing.Size(112, 20);
+            this.lblCCCurrent.TabIndex = 4;
+            this.lblCCCurrent.Text = "Current Value:";
+            // 
+            // txtCCCurrent
+            // 
+            this.txtCCCurrent.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tableLayoutPanel16.SetColumnSpan(this.txtCCCurrent, 3);
+            this.txtCCCurrent.Location = new System.Drawing.Point(150, 70);
+            this.txtCCCurrent.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCCCurrent.Name = "txtCCCurrent";
+            this.txtCCCurrent.ReadOnly = true;
+            this.txtCCCurrent.Size = new System.Drawing.Size(148, 26);
+            this.txtCCCurrent.TabIndex = 5;
             // 
             // cvmode
             // 
@@ -342,9 +458,18 @@
             // 
             // tableLayoutPanel17
             // 
-            this.tableLayoutPanel17.ColumnCount = 2;
-            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel17.ColumnCount = 5;
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel17.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel17.Controls.Add(this.lblCVTarget, 0, 0);
+            this.tableLayoutPanel17.Controls.Add(this.txtCVTarget, 1, 0);
+            this.tableLayoutPanel17.Controls.Add(this.btnCVSet, 2, 0);
+            this.tableLayoutPanel17.Controls.Add(this.btnCVGet, 3, 0);
+            this.tableLayoutPanel17.Controls.Add(this.lblCVCurrent, 0, 1);
+            this.tableLayoutPanel17.Controls.Add(this.txtCVCurrent, 1, 1);
             this.tableLayoutPanel17.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel17.Location = new System.Drawing.Point(4, 5);
             this.tableLayoutPanel17.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -354,6 +479,72 @@
             this.tableLayoutPanel17.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel17.Size = new System.Drawing.Size(1212, 111);
             this.tableLayoutPanel17.TabIndex = 0;
+            // 
+            // lblCVTarget
+            // 
+            this.lblCVTarget.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCVTarget.AutoSize = true;
+            this.lblCVTarget.Location = new System.Drawing.Point(4, 17);
+            this.lblCVTarget.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCVTarget.Name = "lblCVTarget";
+            this.lblCVTarget.Size = new System.Drawing.Size(140, 20);
+            this.lblCVTarget.TabIndex = 0;
+            this.lblCVTarget.Text = "Target Voltage (V):";
+            // 
+            // txtCVTarget
+            // 
+            this.txtCVTarget.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.txtCVTarget.Location = new System.Drawing.Point(152, 14);
+            this.txtCVTarget.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCVTarget.Name = "txtCVTarget";
+            this.txtCVTarget.Size = new System.Drawing.Size(148, 26);
+            this.txtCVTarget.TabIndex = 1;
+            // 
+            // btnCVSet
+            // 
+            this.btnCVSet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCVSet.Location = new System.Drawing.Point(308, 10);
+            this.btnCVSet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCVSet.Name = "btnCVSet";
+            this.btnCVSet.Size = new System.Drawing.Size(75, 35);
+            this.btnCVSet.TabIndex = 2;
+            this.btnCVSet.Text = "Set";
+            this.btnCVSet.UseVisualStyleBackColor = true;
+            this.btnCVSet.Click += new System.EventHandler(this.btnCVSet_Click);
+            // 
+            // btnCVGet
+            // 
+            this.btnCVGet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCVGet.Location = new System.Drawing.Point(391, 10);
+            this.btnCVGet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCVGet.Name = "btnCVGet";
+            this.btnCVGet.Size = new System.Drawing.Size(75, 35);
+            this.btnCVGet.TabIndex = 3;
+            this.btnCVGet.Text = "Get";
+            this.btnCVGet.UseVisualStyleBackColor = true;
+            this.btnCVGet.Click += new System.EventHandler(this.btnCVGet_Click);
+            // 
+            // lblCVCurrent
+            // 
+            this.lblCVCurrent.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCVCurrent.AutoSize = true;
+            this.lblCVCurrent.Location = new System.Drawing.Point(32, 73);
+            this.lblCVCurrent.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCVCurrent.Name = "lblCVCurrent";
+            this.lblCVCurrent.Size = new System.Drawing.Size(112, 20);
+            this.lblCVCurrent.TabIndex = 4;
+            this.lblCVCurrent.Text = "Current Value:";
+            // 
+            // txtCVCurrent
+            // 
+            this.txtCVCurrent.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tableLayoutPanel17.SetColumnSpan(this.txtCVCurrent, 3);
+            this.txtCVCurrent.Location = new System.Drawing.Point(152, 70);
+            this.txtCVCurrent.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCVCurrent.Name = "txtCVCurrent";
+            this.txtCVCurrent.ReadOnly = true;
+            this.txtCVCurrent.Size = new System.Drawing.Size(148, 26);
+            this.txtCVCurrent.TabIndex = 5;
             // 
             // crmode
             // 
@@ -369,9 +560,18 @@
             // 
             // tableLayoutPanel18
             // 
-            this.tableLayoutPanel18.ColumnCount = 2;
-            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel18.ColumnCount = 5;
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel18.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel18.Controls.Add(this.lblCRTarget, 0, 0);
+            this.tableLayoutPanel18.Controls.Add(this.txtCRTarget, 1, 0);
+            this.tableLayoutPanel18.Controls.Add(this.btnCRSet, 2, 0);
+            this.tableLayoutPanel18.Controls.Add(this.btnCRGet, 3, 0);
+            this.tableLayoutPanel18.Controls.Add(this.lblCRCurrent, 0, 1);
+            this.tableLayoutPanel18.Controls.Add(this.txtCRCurrent, 1, 1);
             this.tableLayoutPanel18.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel18.Location = new System.Drawing.Point(4, 5);
             this.tableLayoutPanel18.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -381,6 +581,72 @@
             this.tableLayoutPanel18.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel18.Size = new System.Drawing.Size(1212, 111);
             this.tableLayoutPanel18.TabIndex = 0;
+            // 
+            // lblCRTarget
+            // 
+            this.lblCRTarget.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCRTarget.AutoSize = true;
+            this.lblCRTarget.Location = new System.Drawing.Point(4, 17);
+            this.lblCRTarget.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCRTarget.Name = "lblCRTarget";
+            this.lblCRTarget.Size = new System.Drawing.Size(166, 20);
+            this.lblCRTarget.TabIndex = 0;
+            this.lblCRTarget.Text = "Target Resistance (Ω):";
+            // 
+            // txtCRTarget
+            // 
+            this.txtCRTarget.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.txtCRTarget.Location = new System.Drawing.Point(178, 14);
+            this.txtCRTarget.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCRTarget.Name = "txtCRTarget";
+            this.txtCRTarget.Size = new System.Drawing.Size(148, 26);
+            this.txtCRTarget.TabIndex = 1;
+            // 
+            // btnCRSet
+            // 
+            this.btnCRSet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCRSet.Location = new System.Drawing.Point(334, 10);
+            this.btnCRSet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCRSet.Name = "btnCRSet";
+            this.btnCRSet.Size = new System.Drawing.Size(75, 35);
+            this.btnCRSet.TabIndex = 2;
+            this.btnCRSet.Text = "Set";
+            this.btnCRSet.UseVisualStyleBackColor = true;
+            this.btnCRSet.Click += new System.EventHandler(this.btnCRSet_Click);
+            // 
+            // btnCRGet
+            // 
+            this.btnCRGet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCRGet.Location = new System.Drawing.Point(417, 10);
+            this.btnCRGet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCRGet.Name = "btnCRGet";
+            this.btnCRGet.Size = new System.Drawing.Size(75, 35);
+            this.btnCRGet.TabIndex = 3;
+            this.btnCRGet.Text = "Get";
+            this.btnCRGet.UseVisualStyleBackColor = true;
+            this.btnCRGet.Click += new System.EventHandler(this.btnCRGet_Click);
+            // 
+            // lblCRCurrent
+            // 
+            this.lblCRCurrent.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCRCurrent.AutoSize = true;
+            this.lblCRCurrent.Location = new System.Drawing.Point(58, 73);
+            this.lblCRCurrent.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCRCurrent.Name = "lblCRCurrent";
+            this.lblCRCurrent.Size = new System.Drawing.Size(112, 20);
+            this.lblCRCurrent.TabIndex = 4;
+            this.lblCRCurrent.Text = "Current Value:";
+            // 
+            // txtCRCurrent
+            // 
+            this.txtCRCurrent.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tableLayoutPanel18.SetColumnSpan(this.txtCRCurrent, 3);
+            this.txtCRCurrent.Location = new System.Drawing.Point(178, 70);
+            this.txtCRCurrent.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCRCurrent.Name = "txtCRCurrent";
+            this.txtCRCurrent.ReadOnly = true;
+            this.txtCRCurrent.Size = new System.Drawing.Size(148, 26);
+            this.txtCRCurrent.TabIndex = 5;
             // 
             // cwmode
             // 
@@ -396,9 +662,18 @@
             // 
             // tableLayoutPanel19
             // 
-            this.tableLayoutPanel19.ColumnCount = 2;
-            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 50F));
+            this.tableLayoutPanel19.ColumnCount = 5;
+            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+            this.tableLayoutPanel19.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
+            this.tableLayoutPanel19.Controls.Add(this.lblCWTarget, 0, 0);
+            this.tableLayoutPanel19.Controls.Add(this.txtCWTarget, 1, 0);
+            this.tableLayoutPanel19.Controls.Add(this.btnCWSet, 2, 0);
+            this.tableLayoutPanel19.Controls.Add(this.btnCWGet, 3, 0);
+            this.tableLayoutPanel19.Controls.Add(this.lblCWCurrent, 0, 1);
+            this.tableLayoutPanel19.Controls.Add(this.txtCWCurrent, 1, 1);
             this.tableLayoutPanel19.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel19.Location = new System.Drawing.Point(4, 5);
             this.tableLayoutPanel19.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
@@ -408,6 +683,72 @@
             this.tableLayoutPanel19.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
             this.tableLayoutPanel19.Size = new System.Drawing.Size(1212, 111);
             this.tableLayoutPanel19.TabIndex = 0;
+            // 
+            // lblCWTarget
+            // 
+            this.lblCWTarget.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCWTarget.AutoSize = true;
+            this.lblCWTarget.Location = new System.Drawing.Point(4, 17);
+            this.lblCWTarget.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCWTarget.Name = "lblCWTarget";
+            this.lblCWTarget.Size = new System.Drawing.Size(136, 20);
+            this.lblCWTarget.TabIndex = 0;
+            this.lblCWTarget.Text = "Target Power (W):";
+            // 
+            // txtCWTarget
+            // 
+            this.txtCWTarget.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.txtCWTarget.Location = new System.Drawing.Point(148, 14);
+            this.txtCWTarget.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCWTarget.Name = "txtCWTarget";
+            this.txtCWTarget.Size = new System.Drawing.Size(148, 26);
+            this.txtCWTarget.TabIndex = 1;
+            // 
+            // btnCWSet
+            // 
+            this.btnCWSet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCWSet.Location = new System.Drawing.Point(304, 10);
+            this.btnCWSet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCWSet.Name = "btnCWSet";
+            this.btnCWSet.Size = new System.Drawing.Size(75, 35);
+            this.btnCWSet.TabIndex = 2;
+            this.btnCWSet.Text = "Set";
+            this.btnCWSet.UseVisualStyleBackColor = true;
+            this.btnCWSet.Click += new System.EventHandler(this.btnCWSet_Click);
+            // 
+            // btnCWGet
+            // 
+            this.btnCWGet.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.btnCWGet.Location = new System.Drawing.Point(387, 10);
+            this.btnCWGet.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.btnCWGet.Name = "btnCWGet";
+            this.btnCWGet.Size = new System.Drawing.Size(75, 35);
+            this.btnCWGet.TabIndex = 3;
+            this.btnCWGet.Text = "Get";
+            this.btnCWGet.UseVisualStyleBackColor = true;
+            this.btnCWGet.Click += new System.EventHandler(this.btnCWGet_Click);
+            // 
+            // lblCWCurrent
+            // 
+            this.lblCWCurrent.Anchor = System.Windows.Forms.AnchorStyles.Right;
+            this.lblCWCurrent.AutoSize = true;
+            this.lblCWCurrent.Location = new System.Drawing.Point(28, 73);
+            this.lblCWCurrent.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.lblCWCurrent.Name = "lblCWCurrent";
+            this.lblCWCurrent.Size = new System.Drawing.Size(112, 20);
+            this.lblCWCurrent.TabIndex = 4;
+            this.lblCWCurrent.Text = "Current Value:";
+            // 
+            // txtCWCurrent
+            // 
+            this.txtCWCurrent.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.tableLayoutPanel19.SetColumnSpan(this.txtCWCurrent, 3);
+            this.txtCWCurrent.Location = new System.Drawing.Point(148, 70);
+            this.txtCWCurrent.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.txtCWCurrent.Name = "txtCWCurrent";
+            this.txtCWCurrent.ReadOnly = true;
+            this.txtCWCurrent.Size = new System.Drawing.Size(148, 26);
+            this.txtCWCurrent.TabIndex = 5;
             // 
             // tableLayoutPanel3
             // 
@@ -877,6 +1218,10 @@
             this.connectToolStripMenuItem.Size = new System.Drawing.Size(93, 29);
             this.connectToolStripMenuItem.Text = "Connect";
             this.connectToolStripMenuItem.Click += new System.EventHandler(this.connectToolStripMenuItem_Click);
+
+            
+
+
             // 
             // MainForm
             // 
@@ -958,8 +1303,6 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel15;
         private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel14;
-        private System.Windows.Forms.Label label5;
         private System.Windows.Forms.ComboBox comboBox3;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel16;
@@ -988,6 +1331,41 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.ToolStripStatusLabel toolStripStatusLabel1;
+
+        // Constant Current controls
+        private System.Windows.Forms.Label lblCCTarget;
+        private System.Windows.Forms.TextBox txtCCTarget;
+        private System.Windows.Forms.Button btnCCSet;
+        private System.Windows.Forms.Button btnCCGet;
+        private System.Windows.Forms.Label lblCCCurrent;
+        private System.Windows.Forms.TextBox txtCCCurrent;
+
+        // Constant Voltage controls
+        private System.Windows.Forms.Label lblCVTarget;
+        private System.Windows.Forms.TextBox txtCVTarget;
+        private System.Windows.Forms.Button btnCVSet;
+        private System.Windows.Forms.Button btnCVGet;
+        private System.Windows.Forms.Label lblCVCurrent;
+        private System.Windows.Forms.TextBox txtCVCurrent;
+
+        // Constant Resistance controls
+        private System.Windows.Forms.Label lblCRTarget;
+        private System.Windows.Forms.TextBox txtCRTarget;
+        private System.Windows.Forms.Button btnCRSet;
+        private System.Windows.Forms.Button btnCRGet;
+        private System.Windows.Forms.Label lblCRCurrent;
+        private System.Windows.Forms.TextBox txtCRCurrent;
+
+        // Constant Power controls
+        private System.Windows.Forms.Label lblCWTarget;
+        private System.Windows.Forms.TextBox txtCWTarget;
+        private System.Windows.Forms.Button btnCWSet;
+        private System.Windows.Forms.Button btnCWGet;
+        private System.Windows.Forms.Label lblCWCurrent;
+        private System.Windows.Forms.TextBox txtCWCurrent;
+
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TableLayoutPanel tableLayoutPanel14;
     }
 }
 

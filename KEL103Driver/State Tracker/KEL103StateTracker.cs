@@ -10,10 +10,18 @@ using System.Threading.Tasks;
 
 namespace KEL103Driver
 {
+    /// <summary>
+    /// Delegate for handling state updates from the KEL103 device
+    /// </summary>
+    /// <param name="state">The new state of the KEL103 device</param>
     public delegate void StateAvailable(KEL103State state);
+
+    public delegate void ConnectionStateChanged(bool isConnected, string message);
 
     public static class KEL103StateTracker
     {
+        // Add connection state event
+        public static event ConnectionStateChanged ConnectionStateChanged;
         public static event StateAvailable NewKEL103StateAvailable;
 
         private static Object task_locker = new Object();
@@ -21,6 +29,7 @@ namespace KEL103Driver
 
         private static bool tracker_active = false;
         private static bool tracker_init_complete = false;
+        private static bool is_connected = false;
 
         private static Object state_locker = new Object();
         private static KEL103State state = null;
@@ -31,11 +40,35 @@ namespace KEL103Driver
         private static UdpClient client = null;
         private static bool is_client_checked_out = false;
 
+        // Add public property for connection state
+        public static bool IsConnected 
+        {
+            get { return is_connected; }
+            private set 
+            {
+                if (is_connected != value)
+                {
+                    is_connected = value;
+                    ConnectionStateChanged?.Invoke(value, 
+                        value ? "Connected to KEL103" : "Disconnected from KEL103");
+                }
+            }
+        }
+
+        private static void UpdateConnectionState(bool connected, string message = null)
+        {
+            lock (client_locker)
+            {
+                IsConnected = connected;
+                Debug.WriteLine($"KEL103 Connection State: {(connected ? "Connected" : "Disconnected")} - {message ?? "No message"}");
+            }
+        }
 
         public static void Start()
         {
             lock(task_locker)
             {
+                UpdateConnectionState(false, "Starting connection...");
                 state_tracker = GenerateTrackerTask();
                 state_tracker.Start();
             }
@@ -43,21 +76,50 @@ namespace KEL103Driver
 
         public static void Stop()
         {
-
+            lock(task_locker)
+            {
+                tracker_active = false;
+                if (client != null)
+                {
+                    client.Close();
+                    client = null;
+                }
+                if (state_tracker != null && !state_tracker.IsCompleted)
+                {
+                    state_tracker.Wait(1000);
+                }
+                tracker_init_complete = false;
+                UpdateConnectionState(false, "Connection stopped");
+            }
         }
 
-        public static UdpClient CheckoutClient()
+        private static async Task<UdpClient> CreateAndConfigureClientAsync()
         {
-            if (client == null)
-                throw new Exception("null client exception");
-            
-            lock (client_locker)
-            {
-                //while (is_client_checked_out)
-                //    Thread.Sleep(1);
+            var newClient = new UdpClient(KEL103Persistance.Configuration.CommandPort);
+            KEL103Tools.ConfigureClient(address, newClient);
+            return newClient;
+        }
 
-                is_client_checked_out = true;
-                return client;
+        public static async Task<UdpClient> CheckoutClientAsync(int timeoutMs = 1000)
+        {
+            using (CancellationTokenSource cts = new CancellationTokenSource(timeoutMs))
+            {
+                while (is_client_checked_out)
+                {
+                    if (cts.Token.IsCancellationRequested)
+                        throw new TimeoutException("Client checkout timeout");
+                    await Task.Delay(10, cts.Token);
+                }
+
+                lock (client_locker)
+                {
+                    if (client == null || client.Client == null)
+                    {
+                        client = CreateAndConfigureClientAsync().Result;
+                    }
+                    is_client_checked_out = true;
+                    return client;
+                }
             }
         }
 
@@ -77,65 +139,104 @@ namespace KEL103Driver
             {
                 tracker_active = true;
 
-                address = KEL103Tools.FindLoadAddress();
-
-                tracker_init_complete = true;
-
-                while (tracker_active)
+                try 
                 {
-                    try
+                    address = KEL103Tools.FindLoadAddress();
+                    if (address == null)
                     {
-                        
+                        UpdateConnectionState(false, "Failed to find KEL103 device address");
+                        return;
+                    }
 
-                        //do work
-                        using (UdpClient client = new UdpClient(KEL103Persistance.Configuration.CommandPort))
+                    tracker_init_complete = true;
+
+                    while (tracker_active)
+                    {
+                        try
                         {
-                            KEL103Tools.ConfigureClient(address, client);
-
-                            KEL103StateTracker.client = client;
+                            lock (client_locker)
+                            {
+                                if (client != null)
+                                {
+                                    client.Close();
+                                    client = null;
+                                }
+                                client = CreateAndConfigureClientAsync().Result;
+                            }
+                            
+                            UpdateConnectionState(true);
 
                             while (tracker_active)
                             {
                                 Stopwatch q = new Stopwatch();
                                 q.Start();
 
-                                CheckoutClient();
+                                await CheckoutClientAsync();
 
                                 var kel_state = new KEL103State();
 
-                                var voltage =  await KEL103Command.MeasureVoltage(client);
-                                var current = await KEL103Command.MeasureCurrent(client);
-                                var power = await KEL103Command.MeasurePower(client);
+                                try
+                                {
+                                    var voltage = await KEL103Command.MeasureVoltage(client);
+                                    var current = await KEL103Command.MeasureCurrent(client);
+                                    var power = await KEL103Command.MeasurePower(client);
+                                    var input_state = await KEL103Command.GetLoadInputSwitchState(client);
 
-                                var input_state = await KEL103Command.GetLoadInputSwitchState(client);
+                                    var time_stamp = DateTime.Now;
 
-                                var time_stame = DateTime.Now;
+                                    q.Stop();
 
-                                CheckinClient();
+                                    var retrieval_span = TimeSpan.FromTicks(q.ElapsedTicks);
 
-                                q.Stop();
+                                    kel_state.Voltage = voltage;
+                                    kel_state.Current = current;
+                                    kel_state.Power = power;
+                                    kel_state.TimeStamp = time_stamp;
+                                    kel_state.InputState = input_state;
+                                    kel_state.ValueAquisitionTimespan = retrieval_span;
 
-                                var retreval_span = TimeSpan.FromTicks(q.ElapsedTicks);
+                                    lock (state_locker)
+                                    {
+                                        state = kel_state;
+                                    }
 
-                                kel_state.Voltage = voltage;
-                                kel_state.Current = current;
-                                kel_state.Power = power;
-                                kel_state.TimeStamp = time_stame;
-                                kel_state.InputState = input_state;
-                                kel_state.ValueAquisitionTimespan = retreval_span;
-
-                                Task.Run(() => {  NewKEL103StateAvailable(kel_state); });
+                                    Task.Run(() => { NewKEL103StateAvailable?.Invoke(kel_state); });
+                                }
+                                catch (Exception ex)
+                                {
+                                    UpdateConnectionState(false, $"Communication error: {ex.Message}");
+                                    throw;
+                                }
+                                finally
+                                {
+                                    CheckinClient();
+                                }
 
                                 await Task.Delay(100);
                             }
                         }
-                    }
-                    catch(Exception ex)
-                    {
-                        //an error occured. reinnitalize.
+                        catch(Exception ex)
+                        {
+                            UpdateConnectionState(false, $"Connection error: {ex.Message}");
+                            await Task.Delay(1000); // Delay before retry
+                        }
                     }
                 }
+                catch (Exception ex)
+                {
+                    UpdateConnectionState(false, $"Fatal error: {ex.Message}");
+                    Debug.WriteLine($"KEL103StateTracker fatal error: {ex}");
+                }
             });
+        }
+
+        public static bool TryGetLatestState(out KEL103State state)
+        {
+            lock (state_locker)
+            {
+                state = KEL103StateTracker.state;
+                return state != null;
+            }
         }
     }
 }
