@@ -16,7 +16,7 @@ namespace KEL103DriverUtility
 {
     public partial class MainForm : Form
     {
-        int max_chart_points = 1000;
+        int max_chart_points = 100;
 
         ConcurrentQueue<KEL103State> new_kel103_states = new ConcurrentQueue<KEL103State>();
         Queue<KEL103State> kel103_states = new Queue<KEL103State>();
@@ -95,14 +95,34 @@ namespace KEL103DriverUtility
 
             charts = new Chart[]{chart1, chart2 };
 
-            text_boxes = new TextBox[][] { new TextBox[] {textBox1, textBox2, textBox3 }, new TextBox[] { textBox4 , textBox5 , textBox6 } };
+            text_boxes = new TextBox[][] { 
+                new TextBox[] {textBox1, textBox2, textBox3, textBox7}, // Channel 1
+                new TextBox[] {textBox4, textBox5, textBox6, textBox8}  // Channel 2
+            };
 
-            for(int i = 0; i< 2; i++)
+            for(int i = 0; i < 2; i++)
             {
                 Chart c = charts[i];
                 
-                c.ChartAreas[0].AxisX.LabelStyle.Format = "dd.hh.mm.ss";
+                // Set a fixed time format that won't change
+                c.ChartAreas[0].AxisX.LabelStyle.Format = "HH:mm:ss";
                 c.Series[0].XValueType = ChartValueType.DateTime;
+                
+                // Add consistent margins to create a border effect
+                c.ChartAreas[0].Position = new ElementPosition(5, 5, 90, 90);
+                c.ChartAreas[0].InnerPlotPosition = new ElementPosition(10, 5, 85, 85);
+                
+                // Set minimum interval to prevent too many labels
+                c.ChartAreas[0].AxisX.IntervalAutoMode = IntervalAutoMode.VariableCount;
+                
+                // Enable anti-aliasing for smoother appearance
+                c.AntiAliasing = AntiAliasingStyles.All;
+                c.TextAntiAliasingQuality = TextAntiAliasingQuality.High;
+                
+                // Set border style
+                c.BorderlineColor = Color.Gray;
+                c.BorderlineWidth = 1;
+                c.BorderlineDashStyle = ChartDashStyle.Solid;
             }
 
             Show();
@@ -132,7 +152,196 @@ namespace KEL103DriverUtility
                 return cp;
             }
         }
-        
+
+        private async Task RefreshValue(Func<Task<double>> getValue, TextBox display, string type)
+        {
+            try
+            {
+                using (var client = await KEL103StateTracker.CheckoutClientAsync())
+                {
+                    var value = await getValue();
+                    KEL103StateTracker.CheckinClient();
+
+                    BeginInvoke((MethodInvoker)(() => {
+                        if (display != null)
+                        {
+                            display.Text = KEL103Tools.FormatString(value);
+                            display.BackColor = Color.LightYellow;
+                            display.Refresh();
+
+                            Task.Delay(500).ContinueWith(_ => {
+                                if (!IsDisposed)
+                                {
+                                    BeginInvoke((MethodInvoker)(() => {
+                                        if (display != null && !display.IsDisposed)
+                                        {
+                                            display.BackColor = SystemColors.Window;
+                                        }
+                                    }));
+                                }
+                            });
+                        }
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync($"Failed to refresh {type}: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task RefreshCCValue()
+        {
+            try
+            {
+                using (var client = await KEL103StateTracker.CheckoutClientAsync())
+                {
+                    var value = await KEL103Command.GetConstantCurrentTarget(client);
+                    KEL103StateTracker.CheckinClient();
+
+                    BeginInvoke((MethodInvoker)(() => {
+                        if (txtCCCurrent != null)
+                        {
+                            txtCCCurrent.Text = KEL103Tools.FormatString(value);
+                            txtCCCurrent.BackColor = Color.LightYellow;
+                            txtCCCurrent.Refresh();
+
+                            Task.Delay(500).ContinueWith(_ => {
+                                if (!IsDisposed)
+                                {
+                                    BeginInvoke((MethodInvoker)(() => {
+                                        if (txtCCCurrent != null && !txtCCCurrent.IsDisposed)
+                                        {
+                                            txtCCCurrent.BackColor = SystemColors.Window;
+                                        }
+                                    }));
+                                }
+                            });
+                        }
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync($"Failed to refresh current: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task RefreshCVValue()
+        {
+            try
+            {
+                using (var client = await KEL103StateTracker.CheckoutClientAsync())
+                {
+                    var value = await KEL103Command.GetConstantVoltageTarget(client);
+                    KEL103StateTracker.CheckinClient();
+
+                    BeginInvoke((MethodInvoker)(() => {
+                        if (txtCVCurrent != null)
+                        {
+                            txtCVCurrent.Text = KEL103Tools.FormatString(value);
+                            txtCVCurrent.BackColor = Color.LightYellow;
+                            txtCVCurrent.Refresh();
+
+                            Task.Delay(500).ContinueWith(_ => {
+                                if (!IsDisposed)
+                                {
+                                    BeginInvoke((MethodInvoker)(() => {
+                                        if (txtCVCurrent != null && !txtCVCurrent.IsDisposed)
+                                        {
+                                            txtCVCurrent.BackColor = SystemColors.Window;
+                                        }
+                                    }));
+                                }
+                            });
+                        }
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync($"Failed to refresh voltage: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task RefreshCRValue()
+        {
+            try
+            {
+                using (var client = await KEL103StateTracker.CheckoutClientAsync())
+                {
+                    var value = await KEL103Command.GetConstantResistanceTarget(client);
+                    KEL103StateTracker.CheckinClient();
+
+                    BeginInvoke((MethodInvoker)(() => {
+                        if (txtCRCurrent != null)
+                        {
+                            txtCRCurrent.Text = KEL103Tools.FormatString(value);
+                            txtCRCurrent.BackColor = Color.LightYellow;
+                            txtCRCurrent.Refresh();
+
+                            Task.Delay(500).ContinueWith(_ => {
+                                if (!IsDisposed)
+                                {
+                                    BeginInvoke((MethodInvoker)(() => {
+                                        if (txtCRCurrent != null && !txtCRCurrent.IsDisposed)
+                                        {
+                                            txtCRCurrent.BackColor = SystemColors.Window;
+                                        }
+                                    }));
+                                }
+                            });
+                        }
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync($"Failed to refresh resistance: {ex.Message}");
+                throw;
+            }
+        }
+
+        private async Task RefreshCWValue()
+        {
+            try
+            {
+                using (var client = await KEL103StateTracker.CheckoutClientAsync())
+                {
+                    var value = await KEL103Command.GetConstantPowerTarget(client);
+                    KEL103StateTracker.CheckinClient();
+
+                    BeginInvoke((MethodInvoker)(() => {
+                        if (txtCWCurrent != null)
+                        {
+                            txtCWCurrent.Text = KEL103Tools.FormatString(value);
+                            txtCWCurrent.BackColor = Color.LightYellow;
+                            txtCWCurrent.Refresh();
+
+                            Task.Delay(500).ContinueWith(_ => {
+                                if (!IsDisposed)
+                                {
+                                    BeginInvoke((MethodInvoker)(() => {
+                                        if (txtCWCurrent != null && !txtCWCurrent.IsDisposed)
+                                        {
+                                            txtCWCurrent.BackColor = SystemColors.Window;
+                                        }
+                                    }));
+                                }
+                            });
+                        }
+                    }));
+                }
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorAsync($"Failed to refresh power: {ex.Message}");
+                throw;
+            }
+        }
 
         // Add this event handler to prevent tab switching to non-active modes
         private void tabControl1_Selecting(object sender, TabControlCancelEventArgs e)
@@ -313,255 +522,311 @@ namespace KEL103DriverUtility
 
         private void refreshTask()
         {
-            while (new_kel103_states.Count() > 0)
+            // Process all pending states at once
+            var statesToProcess = new List<KEL103State>();
+            while (new_kel103_states.TryDequeue(out KEL103State result))
             {
-                KEL103State result = null;
-                bool safe = new_kel103_states.TryDequeue(out result);
-                if (safe)
-                    kel103_states.Enqueue(result);
+                statesToProcess.Add(result);
+                kel103_states.Enqueue(result);
             }
 
-            var a = kel103_states.Last();
+            if (statesToProcess.Count == 0)
+                return;
 
-            Invoke((MethodInvoker)(() =>
-            {
-                button2.BackColor = a.InputState ? Color.Red : Color.Green;
-                button2.Text = a.InputState ? "Load Active" : "Load Inactive";
+            // Keep queue size manageable
+            while (kel103_states.Count > max_chart_points)
+                kel103_states.Dequeue();
 
-                toolStripStatusLabel1.Text = a.ValueAquisitionTimespan.ToString();
-            }));
+            var latestState = kel103_states.Last();
 
-            Parallel.For(0, 2, i =>
-            {
-                Chart c = charts[i];
-                TextBox[] t = text_boxes[i];
-                Queue<DateTime> timestamp_queue = chart_values[i][0];
-                Queue<double> value_queue = chart_values[i][1];
-
-                if (channel_value_type_invalid[i])
-                {
-                    value_queue.Clear();
-                    timestamp_queue.Clear();
-
-                    //Invoke((MethodInvoker)(() => c.Series[0].Points.Clear()));
-
-                    var cvt = channel_value_type[i];
-                    foreach (var kel103val in kel103_states)
-                    {
-                        var value = new Func<dynamic>(() =>
-                        {
-                            switch (cvt)
-                            {
-                                case 0: return a.Voltage;
-                                case 1: return a.Current;
-                                case 2: return a.Power;
-                                default: throw new Exception("invalid field type");
-                            }
-                        })();
-
-                        value_queue.Enqueue(value);
-                        timestamp_queue.Enqueue(kel103val.TimeStamp);
-                    }
-
-                    channel_value_type_invalid[i] = false;
-                }
-
-                while (kel103_states.Count() > max_chart_points)
-                    kel103_states.Dequeue();
-
-                timestamp_queue.Enqueue(a.TimeStamp);
-
-                switch (channel_value_type[i])
-                {
-                    case 0: value_queue.Enqueue(a.Voltage); break;
-                    case 1: value_queue.Enqueue(a.Current); break;
-                    case 2: value_queue.Enqueue(a.Power); break;
-                }
-
-                Invoke((MethodInvoker)(() =>
-                {
-                    t[0].Text = KEL103Tools.FormatString(value_queue.Max()); //max
-                    t[1].Text = KEL103Tools.FormatString(value_queue.Min()); //min
-                    t[2].Text = KEL103Tools.FormatString(value_queue.Average()); //avg
-
-                    c.Series[0].Points.DataBindXY(timestamp_queue, value_queue);
-
-                    var max = value_queue.Max();
-                    var min = value_queue.Min();
-
-                    if (max != min)
-                    {
-                        c.ChartAreas[0].AxisY.Maximum = max + max * 0.1;
-                        c.ChartAreas[0].AxisY.Minimum = min - min * 0.1;
-                    }
-                    else
-                    {
-                        if (max != 0)
-                        {
-                            c.ChartAreas[0].AxisY.Maximum = max + max * 0.5;
-                            c.ChartAreas[0].AxisY.Minimum = max - max * 0.5;
-                        }
-                        else
-                        {
-                            c.ChartAreas[0].AxisY.Maximum = 1;
-                            c.ChartAreas[0].AxisY.Minimum = -1;
-                        }
-                    }
-                }));
-                //});
-
-                while (timestamp_queue.Count() > max_chart_points)
-                {
-                    timestamp_queue.Dequeue();
-                    value_queue.Dequeue();
-                }
-
-                Invoke((MethodInvoker)(() =>
-                {
-                    Update();
-                }));
-            });
-        }
-
-        private async void button2_Click(object sender, EventArgs e)
-        {
-            //switch load input on and off
-            try
-            {
-                // Fix: Use CheckoutClientAsync instead of CheckoutClient
-                using (var client = await KEL103StateTracker.CheckoutClientAsync())
-                {
-                    await KEL103Command.SetLoadInputSwitchState(client, !kel103_states.Last().InputState);
-                    KEL103StateTracker.CheckinClient();
-                }
-            }
-            catch (Exception ex)
-            {
-                await ShowErrorAsync($"Failed to switch input state: {ex.Message}");
-            }
-        }
-
-        private void button3_Click_1(object sender, EventArgs e)
-        {
-            //enable channel 1 value
-            channel_value_type[0] = comboBox3.SelectedIndex > -1 ? comboBox3.SelectedIndex : 0;
-            channel_value_type_invalid[0] = true;
-        }
-
-        private void button4_Click(object sender, EventArgs e)
-        {
-            //enable channel 2 value
-            channel_value_type[1] = comboBox2.SelectedIndex > -1 ? comboBox2.SelectedIndex : 0;
-            channel_value_type_invalid[1] = true;
-        }
-
-        private async void button1_Click_1(object sender, EventArgs e)
-        {
-            //set mode button
-            var selected_index = comboBox1.SelectedIndex;
-            if(selected_index > -1)
-            {
-                try
-                {
-                    // Disable mode switching controls
-                    button1.Enabled = false;
-                    comboBox1.Enabled = false;
-                    
-                    // Disable all tab contents during mode switch
-                    foreach (TabPage tab in tabControl1.TabPages)
-                    {
-                        foreach (Control control in tab.Controls)
-                        {
-                            control.Enabled = false;
-                        }
-                    }
-                    
-                    toolStripStatusLabel1.Text = $"Switching to {KEL103Command.mode_strings[selected_index]}...";
-
-                    // Fix: Use CheckoutClientAsync instead of CheckoutClient
-                    using (var client = await KEL103StateTracker.CheckoutClientAsync())
-                    {
-                        await KEL103Command.SetSystemMode(client, selected_index);
-                        KEL103StateTracker.CheckinClient();
-                    }
-
-                    // Wait for mode to settle
-                    await Task.Delay(1000);
-
-                    // Read back the mode to confirm
-                    using (var client = await KEL103StateTracker.CheckoutClientAsync())
-                    {
-                        var actualMode = await KEL103Command.GetSystemMode(client);
-                        KEL103StateTracker.CheckinClient();
-
-                        if (actualMode != selected_index)
-                        {
-                            await ShowErrorAsync($"Mode change failed. Expected {KEL103Command.mode_strings[selected_index]} but device is in {KEL103Command.mode_strings[actualMode]}");
-                            comboBox1.SelectedIndex = actualMode;
-                            selected_index = actualMode;
-                        }
-                    }
-
-                    // Update UI based on new mode
-                    UpdateTabsForMode(selected_index);
-                    
-                    // Refresh the value for the new mode (except SHORT)
-                    if (selected_index < 4)
-                    {
-                        await RefreshCurrentModeValue(selected_index);
-                    }
-
-                    toolStripStatusLabel1.Text = $"Mode set to {KEL103Command.mode_strings[selected_index]}";
-                }
-                catch (Exception ex)
-                {
-                    await ShowErrorAsync($"Failed to set mode: {ex.Message}");
-                    // Re-enable the appropriate tab on error
-                    UpdateTabsForMode(currentMode);
-                }
-                finally
-                {
-                    // Re-enable controls
-                    button1.Enabled = true;
-                    comboBox1.Enabled = true;
-                }
-            }
-        }
-
-        private async Task ShowErrorAsync(string message)
-        {
-            try 
-            {
-                if (InvokeRequired)
-                {
-                    await Task.Factory.FromAsync(
-                        BeginInvoke(new Action(() => ShowErrorMessage(message))),
-                        EndInvoke);
-                    return;
-                }
-
-                ShowErrorMessage(message);
-            }
-            catch (Exception ex)
-            {
-                // Fallback error handling if the UI invocation fails
-                System.Diagnostics.Debug.WriteLine($"Error showing error message: {ex.Message}");
-                System.Diagnostics.Debug.WriteLine($"Original error: {message}");
-            }
-        }
-
-        private void ShowErrorMessage(string message)
-        {
-            // Update status strip
-            toolStripStatusLabel1.Text = message;
+            // Prepare all chart data on background thread
+            var chartUpdates = new List<Action>();
             
-            // Show message box
-            MessageBox.Show(this, 
-                message,
-                "Error",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Error);
+            for (int i = 0; i < 2; i++)
+            {
+                var chartIndex = i;
+                var timestampQueue = chart_values[chartIndex][0] as Queue<DateTime>;
+                var valueQueue = chart_values[chartIndex][1] as Queue<double>;
+
+                // Handle invalidation
+                if (channel_value_type_invalid[chartIndex])
+                {
+                    valueQueue.Clear();
+                    timestampQueue.Clear();
+
+                    var valueType = channel_value_type[chartIndex];
+                    foreach (var state in kel103_states)
+                    {
+                        double value;
+                        switch (valueType)
+                        {
+                            case 0: value = state.Voltage; break;
+                            case 1: value = state.Current; break;
+                            case 2: value = state.Power; break;
+                            default: throw new Exception("Invalid value type");
+                        }
+                        valueQueue.Enqueue(value);
+                        timestampQueue.Enqueue(state.TimeStamp);
+                    }
+                    channel_value_type_invalid[chartIndex] = false;
+                }
+                else
+                {
+                    // Add new states
+                    foreach (var state in statesToProcess)
+                    {
+                        timestampQueue.Enqueue(state.TimeStamp);
+                        switch (channel_value_type[chartIndex])
+                        {
+                            case 0: valueQueue.Enqueue(state.Voltage); break;
+                            case 1: valueQueue.Enqueue(state.Current); break;
+                            case 2: valueQueue.Enqueue(state.Power); break;
+                        }
+                    }
+                }
+
+                // Trim queues
+                while (timestampQueue.Count > max_chart_points)
+                {
+                    timestampQueue.Dequeue();
+                    valueQueue.Dequeue();
+                }
+
+                // Pre-calculate all values
+                var max = valueQueue.Max();
+                var min = valueQueue.Min();
+                var avg = valueQueue.Average();
+                var last = valueQueue.Last();
+                var range = max - min;
+
+                // Store update action
+                chartUpdates.Add(() => UpdateChart(chartIndex, timestampQueue, valueQueue, max, min, avg, last, range));
+            }
+
+            // Single UI update for everything
+            BeginInvoke((MethodInvoker)(() =>
+            {
+                // Update button state
+                button2.BackColor = latestState.InputState ? Color.Red : Color.Green;
+                button2.Text = latestState.InputState ? "Load Active" : "Load Inactive";
+                toolStripStatusLabel1.Text = latestState.ValueAquisitionTimespan.ToString();
+
+                // Update all charts
+                foreach (var update in chartUpdates)
+                {
+                    update();
+                }
+            }));
         }
+
+        private void UpdateChart(int index, Queue<DateTime> timestamps, Queue<double> values, 
+    double max, double min, double avg, double last, double range)
+{
+    var chart = charts[index];
+    var textBoxes = text_boxes[index];
+
+    // Update text boxes
+    textBoxes[0].Text = KEL103Tools.FormatString(max);
+    textBoxes[1].Text = KEL103Tools.FormatString(min);
+    textBoxes[2].Text = KEL103Tools.FormatString(avg);
+    if (textBoxes.Length > 3)
+        textBoxes[3].Text = KEL103Tools.FormatString(last);
+
+    // Update chart
+    chart.Series[0].Points.DataBindXY(timestamps, values);
+
+    var yAxis = chart.ChartAreas[0].AxisY;
+    int decimalPlaces = DetermineDecimalPlaces(max, min, range);
+    yAxis.LabelStyle.Format = $"F{decimalPlaces}";
+
+    if (range > 0)
+    {
+        yAxis.Minimum = min;
+        yAxis.Maximum = max;
+        
+        var interval = CalculateNiceInterval(range);
+        yAxis.Interval = interval;
+        
+        var minTick = Math.Floor(min / interval) * interval;
+        var maxTick = Math.Ceiling(max / interval) * interval;
+        
+        if (min - minTick < range * 0.02)
+            yAxis.Minimum = minTick;
+        if (maxTick - max < range * 0.02)
+            yAxis.Maximum = maxTick;
+    }
+    else if (max != 0)
+    {
+        var absValue = Math.Abs(max);
+        var interval = CalculateNiceInterval(absValue * 0.1);
+        
+        yAxis.Minimum = Math.Floor(max / interval) * interval;
+        yAxis.Maximum = Math.Ceiling(max / interval) * interval;
+        
+        if (yAxis.Minimum == yAxis.Maximum)
+        {
+            yAxis.Minimum -= interval;
+            yAxis.Maximum += interval;
+        }
+        
+        yAxis.Interval = interval;
+    }
+    else
+    {
+        yAxis.Minimum = -1;
+        yAxis.Maximum = 1;
+        yAxis.Interval = 0.5;
+    }
+}
+
+private int DetermineDecimalPlaces(double max, double min, double range)
+{
+    if (Math.Abs(max) >= 100 || Math.Abs(min) >= 100) return 0;
+    if (Math.Abs(max) >= 10 || Math.Abs(min) >= 10) return 1;
+    if (Math.Abs(max) < 0.1 && Math.Abs(min) < 0.1 && range < 0.01) return 4;
+    if (Math.Abs(max) < 1 && Math.Abs(min) < 1 && range < 0.1) return 3;
+    return 2;
+}
+
+private async void button2_Click(object sender, EventArgs e)
+{
+    //switch load input on and off
+    try
+    {
+        // Fix: Use CheckoutClientAsync instead of CheckoutClient
+        using (var client = await KEL103StateTracker.CheckoutClientAsync())
+        {
+            await KEL103Command.SetLoadInputSwitchState(client, !kel103_states.Last().InputState);
+            KEL103StateTracker.CheckinClient();
+        }
+    }
+    catch (Exception ex)
+    {
+        await ShowErrorAsync($"Failed to switch input state: {ex.Message}");
+    }
+}
+
+private void button3_Click_1(object sender, EventArgs e)
+{
+    //enable channel 1 value
+    channel_value_type[0] = comboBox3.SelectedIndex > -1 ? comboBox3.SelectedIndex : 0;
+    channel_value_type_invalid[0] = true;
+}
+
+private void button4_Click(object sender, EventArgs e)
+{
+    //enable channel 2 value
+    channel_value_type[1] = comboBox2.SelectedIndex > -1 ? comboBox2.SelectedIndex : 0;
+    channel_value_type_invalid[1] = true;
+}
+
+private async void button1_Click_1(object sender, EventArgs e)
+{
+    //set mode button
+    var selected_index = comboBox1.SelectedIndex;
+    if(selected_index > -1)
+    {
+        try
+        {
+            // Disable mode switching controls
+            button1.Enabled = false;
+            comboBox1.Enabled = false;
+            
+            // Disable all tab contents during mode switch
+            foreach (TabPage tab in tabControl1.TabPages)
+            {
+                foreach (Control control in tab.Controls)
+                {
+                    control.Enabled = false;
+                }
+            }
+            
+            toolStripStatusLabel1.Text = $"Switching to {KEL103Command.mode_strings[selected_index]}...";
+
+            // Fix: Use CheckoutClientAsync instead of CheckoutClient
+            using (var client = await KEL103StateTracker.CheckoutClientAsync())
+            {
+                await KEL103Command.SetSystemMode(client, selected_index);
+                KEL103StateTracker.CheckinClient();
+            }
+
+            // Wait for mode to settle
+            await Task.Delay(1000);
+
+            // Read back the mode to confirm
+            using (var client = await KEL103StateTracker.CheckoutClientAsync())
+            {
+                var actualMode = await KEL103Command.GetSystemMode(client);
+                KEL103StateTracker.CheckinClient();
+
+                if (actualMode != selected_index)
+                {
+                    await ShowErrorAsync($"Mode change failed. Expected {KEL103Command.mode_strings[selected_index]} but device is in {KEL103Command.mode_strings[actualMode]}");
+                    comboBox1.SelectedIndex = actualMode;
+                    selected_index = actualMode;
+                }
+            }
+
+            // Update UI based on new mode
+            UpdateTabsForMode(selected_index);
+            
+            // Refresh the value for the new mode (except SHORT)
+            if (selected_index < 4)
+            {
+                await RefreshCurrentModeValue(selected_index);
+            }
+
+            toolStripStatusLabel1.Text = $"Mode set to {KEL103Command.mode_strings[selected_index]}";
+        }
+        catch (Exception ex)
+        {
+            await ShowErrorAsync($"Failed to set mode: {ex.Message}");
+            // Re-enable the appropriate tab on error
+            UpdateTabsForMode(currentMode);
+        }
+        finally
+        {
+            // Re-enable controls
+            button1.Enabled = true;
+            comboBox1.Enabled = true;
+        }
+    }
+}
+
+private async Task ShowErrorAsync(string message)
+{
+    try 
+    {
+        if (InvokeRequired)
+        {
+            await Task.Factory.FromAsync(
+                BeginInvoke(new Action(() => ShowErrorMessage(message))),
+                EndInvoke);
+            return;
+        }
+
+        ShowErrorMessage(message);
+    }
+    catch (Exception ex)
+    {
+        // Fallback error handling if the UI invocation fails
+        System.Diagnostics.Debug.WriteLine($"Error showing error message: {ex.Message}");
+        System.Diagnostics.Debug.WriteLine($"Original error: {message}");
+    }
+}
+
+private void ShowErrorMessage(string message)
+{
+    // Update status strip
+    toolStripStatusLabel1.Text = message;
+    
+    // Show message box
+    MessageBox.Show(this, 
+        message,
+        "Error",
+        MessageBoxButtons.OK,
+        MessageBoxIcon.Error);
+}
 
         // Add these event handlers for Constant Current tab
         private async void btnCCSet_Click(object sender, EventArgs e)
@@ -630,63 +895,6 @@ namespace KEL103DriverUtility
             finally
             {
                 btnCCGet.Enabled = true;
-            }
-        }
-
-        private async Task RefreshCCValue()
-        {
-            System.Diagnostics.Debug.WriteLine("RefreshCCValue started");
-            
-            try
-            {
-                using (var client = await KEL103StateTracker.CheckoutClientAsync())
-                {
-                    System.Diagnostics.Debug.WriteLine("Got client, calling GetConstantCurrentTarget");
-                    var currentValue = await KEL103Command.GetConstantCurrentTarget(client);
-                    KEL103StateTracker.CheckinClient();
-                    
-                    System.Diagnostics.Debug.WriteLine($"Retrieved current value: {currentValue}");
-                    
-                    Invoke((MethodInvoker)(() => {
-                        System.Diagnostics.Debug.WriteLine($"In UI thread - txtCCCurrent exists: {txtCCCurrent != null}");
-                        
-                        if (txtCCCurrent == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine("ERROR: txtCCCurrent is null!");
-                            return;
-                        }
-                        
-                        var formattedValue = KEL103Tools.FormatString(currentValue);
-                        System.Diagnostics.Debug.WriteLine($"Formatted value: {formattedValue}");
-                        
-                        txtCCCurrent.Text = formattedValue;
-                        System.Diagnostics.Debug.WriteLine($"Text set to: {txtCCCurrent.Text}");
-                        
-                        // Highlight to indicate it was refreshed
-                        txtCCCurrent.BackColor = Color.LightYellow;
-                        System.Diagnostics.Debug.WriteLine("Background color set to yellow");
-                        
-                        // Force refresh
-                        txtCCCurrent.Refresh();
-                        
-                        // Reset highlighting after a short delay
-                        Task.Delay(500).ContinueWith(_ => {
-                            if (IsDisposed) return;
-                            Invoke((MethodInvoker)(() => {
-                                if (txtCCCurrent != null && !txtCCCurrent.IsDisposed)
-                                {
-                                    txtCCCurrent.BackColor = SystemColors.Window;
-                                    System.Diagnostics.Debug.WriteLine("Background reset to normal");
-                                }
-                            }));
-                        });
-                    }));
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Exception in RefreshCCValue: {ex}");
-                throw;
             }
         }
 
@@ -762,72 +970,6 @@ namespace KEL103DriverUtility
             }
         }
 
-        private async Task RefreshCVValue()
-        {
-            System.Diagnostics.Debug.WriteLine("RefreshCVValue started");
-            
-            try
-            {
-                using (var client = await KEL103StateTracker.CheckoutClientAsync())
-                {
-                    System.Diagnostics.Debug.WriteLine("Got client, calling GetConstantVoltageTarget");
-                    var voltageValue = await KEL103Command.GetConstantVoltageTarget(client);
-                    KEL103StateTracker.CheckinClient();
-                    
-                    System.Diagnostics.Debug.WriteLine($"Retrieved voltage value: {voltageValue}");
-                    
-                    // Use BeginInvoke instead of Invoke for UI updates
-                    BeginInvoke((MethodInvoker)(() => {
-                        System.Diagnostics.Debug.WriteLine($"In UI thread - txtCVCurrent exists: {txtCVCurrent != null}");
-                        System.Diagnostics.Debug.WriteLine($"txtCVCurrent visible: {txtCVCurrent?.Visible ?? false}");
-                        System.Diagnostics.Debug.WriteLine($"txtCVCurrent enabled: {txtCVCurrent?.Enabled ?? false}");
-                        
-                        if (txtCVCurrent == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine("ERROR: txtCVCurrent is null!");
-                            return;
-                        }
-                        
-                        var formattedValue = KEL103Tools.FormatString(voltageValue);
-                        System.Diagnostics.Debug.WriteLine($"Formatted value: {formattedValue}");
-                        
-                        // Update with clear naming to avoid confusion (voltage not current)
-                        txtCVCurrent.Text = formattedValue;
-                        System.Diagnostics.Debug.WriteLine($"Text set to: {txtCVCurrent.Text}");
-                        
-                        // Highlight more visibly to indicate it was refreshed
-                        txtCVCurrent.BackColor = Color.Yellow;
-                        System.Diagnostics.Debug.WriteLine("Background color set to yellow");
-                        
-                        // Force the control to repaint immediately
-                        txtCVCurrent.Refresh();
-                        Application.DoEvents();
-                        
-                        // Double-check the text was set
-                        System.Diagnostics.Debug.WriteLine($"After refresh, text is: {txtCVCurrent.Text}");
-                        
-                        // Reset highlighting after a longer delay for visibility
-                        Task.Delay(1000).ContinueWith(_ => {
-                            if (IsDisposed) return;
-                            BeginInvoke((MethodInvoker)(() => {
-                                if (txtCVCurrent != null && !txtCVCurrent.IsDisposed)
-                                {
-                                    txtCVCurrent.BackColor = SystemColors.Window;
-                                    System.Diagnostics.Debug.WriteLine("Background reset to normal");
-                                    System.Diagnostics.Debug.WriteLine($"Final text: {txtCVCurrent.Text}");
-                                }
-                            }));
-                        });
-                    }));
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Exception in RefreshCVValue: {ex}");
-                throw;
-            }
-        }
-
         // Add these event handlers for Constant Resistance tab
         private async void btnCRSet_Click(object sender, EventArgs e)
         {
@@ -897,71 +1039,6 @@ namespace KEL103DriverUtility
             finally
             {
                 btnCRGet.Enabled = true;
-            }
-        }
-
-        private async Task RefreshCRValue()
-        {
-            System.Diagnostics.Debug.WriteLine("RefreshCRValue started");
-            
-            try
-            {
-                using (var client = await KEL103StateTracker.CheckoutClientAsync())
-                {
-                    System.Diagnostics.Debug.WriteLine("Got client, calling GetConstantResistanceTarget");
-                    var resistanceValue = await KEL103Command.GetConstantResistanceTarget(client);
-                    KEL103StateTracker.CheckinClient();
-                    
-                    System.Diagnostics.Debug.WriteLine($"Retrieved resistance value: {resistanceValue}");
-                    
-                    // Use BeginInvoke instead of Invoke for UI updates
-                    BeginInvoke((MethodInvoker)(() => {
-                        System.Diagnostics.Debug.WriteLine($"In UI thread - txtCRCurrent exists: {txtCRCurrent != null}");
-                        System.Diagnostics.Debug.WriteLine($"txtCRCurrent visible: {txtCRCurrent?.Visible ?? false}");
-                        System.Diagnostics.Debug.WriteLine($"txtCRCurrent enabled: {txtCRCurrent?.Enabled ?? false}");
-                        
-                        if (txtCRCurrent == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine("ERROR: txtCRCurrent is null!");
-                            return;
-                        }
-                        
-                        var formattedValue = KEL103Tools.FormatString(resistanceValue);
-                        System.Diagnostics.Debug.WriteLine($"Formatted value: {formattedValue}");
-                        
-                        txtCRCurrent.Text = formattedValue;
-                        System.Diagnostics.Debug.WriteLine($"Text set to: {txtCRCurrent.Text}");
-                        
-                        // Highlight more visibly to indicate it was refreshed
-                        txtCRCurrent.BackColor = Color.Yellow;
-                        System.Diagnostics.Debug.WriteLine("Background color set to yellow");
-                        
-                        // Force the control to repaint immediately
-                        txtCRCurrent.Refresh();
-                        Application.DoEvents();
-                        
-                        // Double-check the text was set
-                        System.Diagnostics.Debug.WriteLine($"After refresh, text is: {txtCRCurrent.Text}");
-                        
-                        // Reset highlighting after a longer delay for visibility
-                        Task.Delay(1000).ContinueWith(_ => {
-                            if (IsDisposed) return;
-                            BeginInvoke((MethodInvoker)(() => {
-                                if (txtCRCurrent != null && !txtCRCurrent.IsDisposed)
-                                {
-                                    txtCRCurrent.BackColor = SystemColors.Window;
-                                    System.Diagnostics.Debug.WriteLine("Background reset to normal");
-                                    System.Diagnostics.Debug.WriteLine($"Final text: {txtCRCurrent.Text}");
-                                }
-                            }));
-                        });
-                    }));
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Exception in RefreshCRValue: {ex}");
-                throw;
             }
         }
 
@@ -1068,68 +1145,6 @@ namespace KEL103DriverUtility
             }
         }
 
-        // Updated CW refresh method
-        private async Task RefreshCWValue()
-        {
-            System.Diagnostics.Debug.WriteLine("RefreshCWValue started");
-            
-            try
-            {
-                using (var client = await KEL103StateTracker.CheckoutClientAsync())
-                {
-                    System.Diagnostics.Debug.WriteLine("Got client, calling GetConstantPowerTarget");
-                    var powerValue = await KEL103Command.GetConstantPowerTarget(client);
-                    KEL103StateTracker.CheckinClient();
-                    
-                    System.Diagnostics.Debug.WriteLine($"Retrieved power value: {powerValue}");
-                    
-                    BeginInvoke((MethodInvoker)(() => {
-                        // ONLY update the current value display textbox
-                        if (txtCWCurrent == null)
-                        {
-                            System.Diagnostics.Debug.WriteLine("ERROR: txtCWCurrent is null!");
-                            return;
-                        }
-                        
-                        var formattedValue = KEL103Tools.FormatString(powerValue);
-                        System.Diagnostics.Debug.WriteLine($"Formatted value: {formattedValue}");
-                        
-                        txtCWCurrent.Text = formattedValue;
-                        System.Diagnostics.Debug.WriteLine($"Text set to: {txtCWCurrent.Text}");
-                        
-                        // Highlight more visibly to indicate it was refreshed
-                        txtCWCurrent.BackColor = Color.Yellow;
-                        System.Diagnostics.Debug.WriteLine("Background color set to yellow");
-                        
-                        // Force the control to repaint immediately
-                        txtCWCurrent.Refresh();
-                        Application.DoEvents();
-                        
-                        // Double-check the text was set
-                        System.Diagnostics.Debug.WriteLine($"After refresh, text is: {txtCWCurrent.Text}");
-                        
-                        // Reset highlighting after a longer delay for visibility
-                        Task.Delay(1000).ContinueWith(_ => {
-                            if (IsDisposed) return;
-                            BeginInvoke((MethodInvoker)(() => {
-                                if (txtCWCurrent != null && !txtCWCurrent.IsDisposed)
-                                {
-                                    txtCWCurrent.BackColor = SystemColors.Window;
-                                    System.Diagnostics.Debug.WriteLine("Background reset to normal");
-                                    System.Diagnostics.Debug.WriteLine($"Final text: {txtCWCurrent.Text}");
-                                }
-                            }));
-                        });
-                    }));
-                }
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Debug.WriteLine($"Exception in RefreshCWValue: {ex}");
-                throw;
-            }
-        }
-
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
@@ -1215,5 +1230,28 @@ namespace KEL103DriverUtility
             
             return null;
         }
+
+private double CalculateNiceInterval(double range)
+{
+    if (range <= 0)
+        return 1;
+
+    // Find the magnitude of the range
+    var magnitude = Math.Pow(10, Math.Floor(Math.Log10(range)));
+    var normalized = range / magnitude;
+    
+    // Pick a nice interval that gives us 4-8 ticks
+    double niceInterval;
+    if (normalized <= 1.2)
+        niceInterval = 0.2;
+    else if (normalized <= 2.5)
+        niceInterval = 0.5;
+    else if (normalized <= 5)
+        niceInterval = 1;
+    else
+        niceInterval = 2;
+    
+    return niceInterval * magnitude;
+}
     }
 }
