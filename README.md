@@ -2,6 +2,9 @@
 
 **KEL103Driver** is a C# library designed to control and monitor the **Korad KEL-103 Programmable DC Electronic Load** over a network. It provides high-level functions to discover the KEL-103 on a LAN, send commands via UDP (the device’s network protocol), and retrieve measurements. The repository also includes a basic Windows utility for testing and a TCP bridge server to facilitate integration with standard instrument control tools like NI/VISA. This allows developers and end users to easily integrate the KEL-103 electronic load into automated test setups or custom applications.
 
+<img src="https://private-user-images.githubusercontent.com/2748872/466365284-caed7a4e-befa-4b36-bddf-0af279fbac09.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NTI1NjU1OTgsIm5iZiI6MTc1MjU2NTI5OCwicGF0aCI6Ii8yNzQ4ODcyLzQ2NjM2NTI4NC1jYWVkN2E0ZS1iZWZhLTRiMzYtYmRkZi0wYWYyNzlmYmFjMDkucG5nP1gtQW16LUFsZ29yaXRobT1BV1M0LUhNQUMtU0hBMjU2JlgtQW16LUNyZWRlbnRpYWw9QUtJQVZDT0RZTFNBNTNQUUs0WkElMkYyMDI1MDcxNSUyRnVzLWVhc3QtMSUyRnMzJTJGYXdzNF9yZXF1ZXN0JlgtQW16LURhdGU9MjAyNTA3MTVUMDc0MTM4WiZYLUFtei1FeHBpcmVzPTMwMCZYLUFtei1TaWduYXR1cmU9ZDhlODhhYTQxM2Y4M2JiNzEwYjA2ZWFlNjAwMzQ2YmFhZjFjMjA3YmUzZWJlYjYyNjU0Njk3MGIyYzkwMDllNiZYLUFtei1TaWduZWRIZWFkZXJzPWhvc3QifQ.kMDR_RG1_1c2DzrzZcEpvIIF0aDR2uOe1AUEWHoCxP4">
+A photo of the KEL103DriverUtility example application.
+
 ## Features and Functionality
 
 - **Network Discovery:** Automatically locate the KEL-103 on the local network by broadcasting a discovery message.
