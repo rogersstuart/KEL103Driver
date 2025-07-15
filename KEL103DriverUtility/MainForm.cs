@@ -126,20 +126,6 @@ namespace KEL103DriverUtility
             }
 
             Show();
-
-            uiRefresh = Task.Run(async () => {
-                while (true)
-                {
-                    if (new_kel103_states.Count() > 0)
-                    {
-                        refreshTask();
-                        //Thread.Sleep(100);
-                    }
-                    else
-                        await Task.Delay(10);
-                }
-            });
-            //uiRefresh.Start();
         }
 
         //helps to prevent flicker
@@ -435,8 +421,8 @@ namespace KEL103DriverUtility
             int systemMode = -1;  // Store mode outside Task.Run
             
             await Task.Run(async () => {
-
-                KEL103StateTracker.NewKEL103StateAvailable += a => onNewState_refresh(a);
+                // Wire up the event handler before starting
+                KEL103StateTracker.NewKEL103StateAvailable += onNewState_refresh;
 
                 KEL103StateTracker.Start();
 
@@ -514,110 +500,25 @@ namespace KEL103DriverUtility
             }
         }
 
-        private void onNewState_refresh(KEL103State a)
+        // Update onNewState_refresh to process states immediately
+private void onNewState_refresh(KEL103State a)
+{
+    // Add to queue
+    kel103_states.Enqueue(a);
+    
+    // Keep queue size manageable
+    while (kel103_states.Count > max_chart_points)
+        kel103_states.Dequeue();
+
+    // Process the update immediately on the UI thread
+    if (!IsDisposed)
+    {
+        BeginInvoke((MethodInvoker)(() =>
         {
-            new_kel103_states.Enqueue(a);
-            Console.WriteLine(new_kel103_states.Count());
-        }
-
-        private void refreshTask()
-        {
-            // Process all pending states at once
-            var statesToProcess = new List<KEL103State>();
-            while (new_kel103_states.TryDequeue(out KEL103State result))
-            {
-                statesToProcess.Add(result);
-                kel103_states.Enqueue(result);
-            }
-
-            if (statesToProcess.Count == 0)
-                return;
-
-            // Keep queue size manageable
-            while (kel103_states.Count > max_chart_points)
-                kel103_states.Dequeue();
-
-            var latestState = kel103_states.Last();
-
-            // Prepare all chart data on background thread
-            var chartUpdates = new List<Action>();
-            
-            for (int i = 0; i < 2; i++)
-            {
-                var chartIndex = i;
-                var timestampQueue = chart_values[chartIndex][0] as Queue<DateTime>;
-                var valueQueue = chart_values[chartIndex][1] as Queue<double>;
-
-                // Handle invalidation
-                if (channel_value_type_invalid[chartIndex])
-                {
-                    valueQueue.Clear();
-                    timestampQueue.Clear();
-
-                    var valueType = channel_value_type[chartIndex];
-                    foreach (var state in kel103_states)
-                    {
-                        double value;
-                        switch (valueType)
-                        {
-                            case 0: value = state.Voltage; break;
-                            case 1: value = state.Current; break;
-                            case 2: value = state.Power; break;
-                            default: throw new Exception("Invalid value type");
-                        }
-                        valueQueue.Enqueue(value);
-                        timestampQueue.Enqueue(state.TimeStamp);
-                    }
-                    channel_value_type_invalid[chartIndex] = false;
-                }
-                else
-                {
-                    // Add new states
-                    foreach (var state in statesToProcess)
-                    {
-                        timestampQueue.Enqueue(state.TimeStamp);
-                        switch (channel_value_type[chartIndex])
-                        {
-                            case 0: valueQueue.Enqueue(state.Voltage); break;
-                            case 1: valueQueue.Enqueue(state.Current); break;
-                            case 2: valueQueue.Enqueue(state.Power); break;
-                        }
-                    }
-                }
-
-                // Trim queues
-                while (timestampQueue.Count > max_chart_points)
-                {
-                    timestampQueue.Dequeue();
-                    valueQueue.Dequeue();
-                }
-
-                // Pre-calculate all values
-                var max = valueQueue.Max();
-                var min = valueQueue.Min();
-                var avg = valueQueue.Average();
-                var last = valueQueue.Last();
-                var range = max - min;
-
-                // Store update action
-                chartUpdates.Add(() => UpdateChart(chartIndex, timestampQueue, valueQueue, max, min, avg, last, range));
-            }
-
-            // Single UI update for everything
-            BeginInvoke((MethodInvoker)(() =>
-            {
-                // Update button state
-                button2.BackColor = latestState.InputState ? Color.Red : Color.Green;
-                button2.Text = latestState.InputState ? "Load Active" : "Load Inactive";
-                toolStripStatusLabel1.Text = latestState.ValueAquisitionTimespan.ToString();
-
-                // Update all charts
-                foreach (var update in chartUpdates)
-                {
-                    update();
-                }
-            }));
-        }
+            ProcessStateUpdate(a);
+        }));
+    }
+}
 
         private void UpdateChart(int index, Queue<DateTime> timestamps, Queue<double> values, 
     double max, double min, double avg, double last, double range)
@@ -635,6 +536,38 @@ namespace KEL103DriverUtility
     // Update chart
     chart.Series[0].Points.DataBindXY(timestamps, values);
 
+    // Handle X-axis to prevent jumping
+    var xAxis = chart.ChartAreas[0].AxisX;
+    if (timestamps.Count > 0)
+    {
+        var timeRange = timestamps.Last() - timestamps.First();
+        
+        // Set appropriate interval based on time range
+        if (timeRange.TotalSeconds < 60)
+        {
+            xAxis.LabelStyle.Format = "HH:mm:ss";
+            xAxis.IntervalType = DateTimeIntervalType.Seconds;
+            xAxis.Interval = Math.Max(1, (int)(timeRange.TotalSeconds / 5));
+        }
+        else if (timeRange.TotalMinutes < 60)
+        {
+            xAxis.LabelStyle.Format = "HH:mm:ss";
+            xAxis.IntervalType = DateTimeIntervalType.Minutes;
+            xAxis.Interval = Math.Max(1, (int)(timeRange.TotalMinutes / 5));
+        }
+        else
+        {
+            xAxis.LabelStyle.Format = "HH:mm";
+            xAxis.IntervalType = DateTimeIntervalType.Hours;
+            xAxis.Interval = Math.Max(1, (int)(timeRange.TotalHours / 5));
+        }
+        
+        // Set explicit min/max to prevent jumping
+        xAxis.Minimum = timestamps.First().ToOADate();
+        xAxis.Maximum = timestamps.Last().ToOADate();
+    }
+
+    // Handle Y-axis as before
     var yAxis = chart.ChartAreas[0].AxisY;
     int decimalPlaces = DetermineDecimalPlaces(max, min, range);
     yAxis.LabelStyle.Format = $"F{decimalPlaces}";
@@ -1231,7 +1164,75 @@ private void ShowErrorMessage(string message)
             return null;
         }
 
-private double CalculateNiceInterval(double range)
+// New method to process a single state update
+private void ProcessStateUpdate(KEL103State latestState)
+{
+    // Update button state
+    button2.BackColor = latestState.InputState ? Color.Red : Color.Green;
+    button2.Text = latestState.InputState ? "Load Active" : "Load Inactive";
+    toolStripStatusLabel1.Text = latestState.ValueAquisitionTimespan.ToString();
+
+    // Update charts
+    for (int i = 0; i < 2; i++)
+    {
+        var timestampQueue = chart_values[i][0] as Queue<DateTime>;
+        var valueQueue = chart_values[i][1] as Queue<double>;
+
+        // Handle invalidation
+        if (channel_value_type_invalid[i])
+        {
+            valueQueue.Clear();
+            timestampQueue.Clear();
+
+            var valueType = channel_value_type[i];
+            foreach (var state in kel103_states)
+            {
+                double value;
+                switch (valueType)
+                {
+                    case 0: value = state.Voltage; break;
+                    case 1: value = state.Current; break;
+                    case 2: value = state.Power; break;
+                    default: throw new Exception("Invalid value type");
+                }
+                valueQueue.Enqueue(value);
+                timestampQueue.Enqueue(state.TimeStamp);
+            }
+            channel_value_type_invalid[i] = false;
+        }
+        else
+        {
+            // Add new state
+            timestampQueue.Enqueue(latestState.TimeStamp);
+            switch (channel_value_type[i])
+            {
+                case 0: valueQueue.Enqueue(latestState.Voltage); break;
+                case 1: valueQueue.Enqueue(latestState.Current); break;
+                case 2: valueQueue.Enqueue(latestState.Power); break;
+            }
+
+            // Trim queues
+            while (timestampQueue.Count > max_chart_points)
+            {
+                timestampQueue.Dequeue();
+                valueQueue.Dequeue();
+            }
+        }
+
+        // Update chart with current data
+        if (valueQueue.Count > 0)
+        {
+            var max = valueQueue.Max();
+            var min = valueQueue.Min();
+            var avg = valueQueue.Average();
+            var last = valueQueue.Last();
+            var range = max - min;
+
+            UpdateChart(i, timestampQueue, valueQueue, max, min, avg, last, range);
+        }
+    }
+}
+        private double CalculateNiceInterval(double range)
 {
     if (range <= 0)
         return 1;

@@ -10,17 +10,11 @@ using System.Threading.Tasks;
 
 namespace KEL103Driver
 {
-    /// <summary>
-    /// Delegate for handling state updates from the KEL103 device
-    /// </summary>
-    /// <param name="state">The new state of the KEL103 device</param>
     public delegate void StateAvailable(KEL103State state);
-
     public delegate void ConnectionStateChanged(bool isConnected, string message);
 
     public static class KEL103StateTracker
     {
-        // Add connection state event
         public static event ConnectionStateChanged ConnectionStateChanged;
         public static event StateAvailable NewKEL103StateAvailable;
 
@@ -40,7 +34,11 @@ namespace KEL103Driver
         private static UdpClient client = null;
         private static bool is_client_checked_out = false;
 
-        // Add public property for connection state
+        // Performance monitoring for adaptive polling
+        private static readonly Queue<TimeSpan> recentMeasurementTimes = new Queue<TimeSpan>();
+        private static TimeSpan targetPollingInterval = TimeSpan.FromMilliseconds(100);
+        private static readonly int measurementHistorySize = 20;
+
         public static bool IsConnected 
         {
             get { return is_connected; }
@@ -133,6 +131,37 @@ namespace KEL103Driver
             get { return tracker_init_complete; }
         }
 
+        private static void UpdatePollingRate(TimeSpan measurementTime)
+        {
+            lock (state_locker)
+            {
+                recentMeasurementTimes.Enqueue(measurementTime);
+                
+                if (recentMeasurementTimes.Count > measurementHistorySize)
+                {
+                    recentMeasurementTimes.Dequeue();
+                }
+
+                if (recentMeasurementTimes.Count >= 10)
+                {
+                    // Calculate the 90th percentile to exclude outliers
+                    var sortedTimes = recentMeasurementTimes.OrderBy(t => t.TotalMilliseconds).ToList();
+                    var index90th = (int)(sortedTimes.Count * 0.9);
+                    var typical90thPercentile = sortedTimes[index90th];
+
+                    // Set polling interval to be slightly slower than the 90th percentile measurement time
+                    // Add 20ms buffer to avoid overwhelming the device
+                    targetPollingInterval = typical90thPercentile.Add(TimeSpan.FromMilliseconds(20));
+                    
+                    // Clamp between reasonable bounds
+                    if (targetPollingInterval < TimeSpan.FromMilliseconds(50))
+                        targetPollingInterval = TimeSpan.FromMilliseconds(50);
+                    else if (targetPollingInterval > TimeSpan.FromMilliseconds(500))
+                        targetPollingInterval = TimeSpan.FromMilliseconds(500);
+                }
+            }
+        }
+
         private static Task GenerateTrackerTask()
         {
             return new Task(async () =>
@@ -168,6 +197,7 @@ namespace KEL103Driver
 
                             while (tracker_active)
                             {
+                                var measurementStart = DateTime.Now;
                                 Stopwatch q = new Stopwatch();
                                 q.Start();
 
@@ -200,6 +230,9 @@ namespace KEL103Driver
                                         state = kel_state;
                                     }
 
+                                    // Update polling rate based on measurement time
+                                    UpdatePollingRate(retrieval_span);
+
                                     Task.Run(() => { NewKEL103StateAvailable?.Invoke(kel_state); });
                                 }
                                 catch (Exception ex)
@@ -212,7 +245,14 @@ namespace KEL103Driver
                                     CheckinClient();
                                 }
 
-                                await Task.Delay(100);
+                                // Wait for the adaptive polling interval
+                                var elapsed = DateTime.Now - measurementStart;
+                                var delayTime = targetPollingInterval - elapsed;
+                                
+                                if (delayTime > TimeSpan.Zero)
+                                {
+                                    await Task.Delay(delayTime);
+                                }
                             }
                         }
                         catch(Exception ex)
@@ -236,6 +276,14 @@ namespace KEL103Driver
             {
                 state = KEL103StateTracker.state;
                 return state != null;
+            }
+        }
+
+        public static TimeSpan GetCurrentPollingInterval()
+        {
+            lock (state_locker)
+            {
+                return targetPollingInterval;
             }
         }
     }
