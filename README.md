@@ -81,7 +81,7 @@ KEL103Driver.KEL103StateTracker.Start();
 // KEL103Driver.KEL103StateTracker.Stop();
 ```
 
-##Other Notes
+## Other Notes
 
 It has been a long time since I purchased my KEL103. From what I recall, all I had to do was connect the load to the network and it began broadcasing its IP via UDP.
 Other people have reported having issues getting their load to work on their network after purchasing it. I came across this Amazon review with helpful information.
